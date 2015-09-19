@@ -1,35 +1,26 @@
 'use strict';
 
 var types = new Map([
-    [1 , 8],  // BYTE
-    [2 , 8],  // ASCII
-    [3 , 16], // SHORT
-    [4 , 32], // LONG
-    [5 , 64], // RATIONAL
-    [6 , 8],  // SBYTE
-    [7 , 8],  // UNDEFINED
-    [8 , 16], // SSHORT
-    [9 , 32], // SLONG
-    [10, 64], // SRATIONAL
-    [11, 32], // FLOAT
-    [12, 64]  // DOUBLE
+    [1 , [1, readByte]],    // BYTE
+    [2 , [1, unreachable]], // ASCII
+    [3 , [2, readShort]],   // SHORT
+    [4 , [4, readLong]],    // LONG
+    [5 , [8, unreachable]], // RATIONAL
+    [6 , [1, unreachable]], // SBYTE
+    [7 , [1, unreachable]], // UNDEFINED
+    [8 , [2, unreachable]], // SSHORT
+    [9 , [4, unreachable]], // SLONG
+    [10, [8, unreachable]], // SRATIONAL
+    [11, [4, unreachable]], // FLOAT
+    [12, [8, unreachable]]  // DOUBLE
 ]);
 
-exports.getIFDValueByteLength = function (type, count) {
-    return types.get(type) * count;
+exports.getByteLength = function (type, count) {
+    return types.get(type)[0] * count;
 };
 
-exports.read = function (decoder, type, count) {
-    switch (type) {
-        case 1:
-            return readByte(decoder, count);
-        case 3:
-            return readShort(decoder, count);
-        case 4:
-            return readLong(decoder, count);
-        default:
-            throw new Error('unreachable');
-    }
+exports.readData = function (decoder, type, count) {
+    return types.get(type)[1](decoder, count);
 };
 
 function readByte(decoder, count) {
@@ -38,6 +29,7 @@ function readByte(decoder, count) {
     for (var i = 0; i < count; i++) {
         array[i] = decoder.readUint8();
     }
+    return array;
 }
 
 function readShort(decoder, count) {
@@ -46,6 +38,7 @@ function readShort(decoder, count) {
     for (var i = 0; i < count; i++) {
         array[i] = decoder.readUint16();
     }
+    return array;
 }
 
 function readLong(decoder, count) {
@@ -54,4 +47,9 @@ function readLong(decoder, count) {
     for (var i = 0; i < count; i++) {
         array[i] = decoder.readUint32();
     }
+    return array;
+}
+
+function unreachable() {
+    throw new Error('unreachable');
 }

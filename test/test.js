@@ -8,4 +8,4 @@ var img = fs.readFileSync(__dirname + '/img/bio.tif');
 var decoder = new TIFFDecoder(img);
 var result = decoder.decode();
 
-console.log(result.ifd);
+console.log(result.ifd[0].data.slice(0, 10));

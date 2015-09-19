@@ -1,6 +1,5 @@
 'use strict';
 
-const debug = require('debug')('tiff');
 const BinaryReader = require('./BinaryReader');
 const IFD = require('./IFD');
 const IFDValue = require('./IFDValue');
@@ -11,7 +10,6 @@ class TIFFDecoder extends BinaryReader {
         super(data);
         this.decoded = false;
         this.tiff = null;
-        this.currentIFD = null;
         this.nextIFD = 0;
     }
 
@@ -26,14 +24,11 @@ class TIFFDecoder extends BinaryReader {
     }
 
     decodeHeader() {
-        debug('decode header');
-
         // Byte offset
         let value = this.readUint16();
         if (value === 0x4949) {
-            debug('BO: little endian');
+            // little endian
         } else if (value === 0x4D4D) {
-            debug('BO: big endian');
             this.setBigEndian();
         } else {
             throw new Error('invalid byte order: 0x' + value.toString(16));
@@ -47,27 +42,21 @@ class TIFFDecoder extends BinaryReader {
 
         // Offset of the first IFD
         this.nextIFD = this.readUint32();
-        debug('first IFD: ' + this.nextIFD);
     }
 
     decodeIFD() {
-        debug('decode IFD at ' + this.nextIFD);
         this.goto(this.nextIFD);
         var ifd = new IFD();
         this.tiff.ifd.push(ifd);
-        this.currentIFD = ifd;
         const numEntries = this.readUint16();
-        debug(numEntries + ' entries');
         for (var i = 0; i < numEntries; i++) {
-            this.decodeIFDEntry();
+            this.decodeIFDEntry(ifd);
         }
-        this.decodeImageData();
-        this.currentIFD = null;
+        this.decodeImageData(ifd);
         this.nextIFD = this.readUint32();
     }
 
-    decodeIFDEntry() {
-        // debug('decode IFD entry');
+    decodeIFDEntry(ifd) {
         let offset = this.offset;
         let tag = this.readUint16();
         let type = this.readUint16();
@@ -75,27 +64,107 @@ class TIFFDecoder extends BinaryReader {
 
         // todo support other types
         if (type !== 1 && type !== 3 && type !== 4) {
-            // debug('unknown type: ' + type);
             this.forward(4);
             return;
         }
 
-        let valueByteLength = IFDValue.getIFDValueByteLength(type, numValues);
-        // debug('type ' + type + ', length: ' + valueByteLength);
-        if (valueByteLength > 32) {
+        let valueByteLength = IFDValue.getByteLength(type, numValues);
+        if (valueByteLength > 4) {
             this.goto(this.readUint32());
         }
 
-        var value = IFDValue.read(this, type, numValues);
-        this.currentIFD.fields.set(tag, value);
+        var value = IFDValue.readData(this, type, numValues);
+        ifd.fields.set(tag, value);
 
         // goto offset of next entry
         this.goto(offset + 12);
     }
 
-    decodeImageData() {
-        // todo do the decoding...
+    decodeImageData(ifd) {
+        switch(ifd.type) {
+            case 0: // WhiteIsZero
+            case 1: // BlackIsZero
+                this.decodeBilevelOrGrey(ifd);
+                break;
+            default:
+                unsupported('image type', ifd.type);
+                break;
+        }
+    }
+
+    decodeBilevelOrGrey(ifd) {
+        const width = ifd.width;
+        const height = ifd.height;
+
+        const bitDepth = ifd.bitsPerSample;
+        let size = width * height;
+        const data = getDataArray(size, 1, bitDepth);
+
+        const compression = ifd.compression;
+        const rowsPerStrip = ifd.rowsPerStrip;
+        const maxPixels = rowsPerStrip * width;
+        const stripOffsets = ifd.stripOffsets;
+        const stripByteCounts = ifd.stripByteCounts;
+
+        var pixel = 0;
+        for (var i = 0; i < stripOffsets.length; i++) {
+            var stripData = this.getStripData(compression, stripOffsets[i], stripByteCounts[i]);
+            // Last strip can be smaller
+            var length = size > maxPixels ? maxPixels : size;
+            size -= length;
+            if (bitDepth === 8) {
+                pixel = fill8bit(data, stripData, pixel, length);
+            } else if (bitDepth === 16) {
+                pixel = fill16bit(data, stripData, pixel, length, this.littleEndian);
+            } else {
+                unsupported('bitDepth: ', bitDepth);
+            }
+        }
+
+        ifd.data = data;
+    }
+
+    getStripData(compression, offset, byteCounts) {
+        switch (compression) {
+            case 1: // No compression
+                return new DataView(this.data.buffer, offset, byteCounts);
+                break;
+            case 2: // CCITT Group 3 1-Dimensional Modified Huffman run length encoding
+            case 32773: // PackBits compression
+                unsupported('Compression', compression);
+                break;
+            default:
+                throw new Error('invalid compression: ' + compression);
+        }
     }
 }
 
 module.exports = TIFFDecoder;
+
+function getDataArray(size, channels, bitDepth) {
+    if (bitDepth === 8) {
+        return new Uint8Array(size * channels);
+    } else if (bitDepth === 16) {
+        return new Uint16Array(size * channels);
+    } else {
+        unsupported('bit depth', bitDepth);
+    }
+}
+
+function fill8bit(dataTo, dataFrom, index, length) {
+    for (var i = 0; i < length; i++) {
+        dataTo[index++] = dataFrom.getUint8(i);
+    }
+    return index;
+}
+
+function fill16bit(dataTo, dataFrom, index, length, littleEndian) {
+    for (var i = 0; i < length * 2; i += 2) {
+        dataTo[index++] = dataFrom.getUint16(i, littleEndian);
+    }
+    return index;
+}
+
+function unsupported(type, value) {
+    throw new Error('Unsupported ' + type + ': ' + value);
+}

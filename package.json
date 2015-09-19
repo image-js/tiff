@@ -15,8 +15,5 @@
   "bugs": {
     "url": "https://github.com/targos/tiff-js/issues"
   },
-  "homepage": "https://github.com/targos/tiff-js#readme",
-  "devDependencies": {
-    "debug": "^2.2.0"
-  }
+  "homepage": "https://github.com/targos/tiff-js#readme"
 }
