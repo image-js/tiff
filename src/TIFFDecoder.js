@@ -27,7 +27,7 @@ class TIFFDecoder extends BinaryReader {
         // Byte offset
         let value = this.readUint16();
         if (value === 0x4949) {
-            // little endian
+            this.setLittleEndian();
         } else if (value === 0x4D4D) {
             this.setBigEndian();
         } else {
@@ -63,7 +63,7 @@ class TIFFDecoder extends BinaryReader {
         let numValues = this.readUint32();
 
         // todo support other types
-        if (type !== 1 && type !== 3 && type !== 4) {
+        if (type !== 1 && type !== 2 && type !== 3 && type !== 4) {
             this.forward(4);
             return;
         }
@@ -81,6 +81,10 @@ class TIFFDecoder extends BinaryReader {
     }
 
     decodeImageData(ifd) {
+        const orientation = ifd.orientation;
+        if (orientation && orientation !== 1) {
+            unsupported('orientation', orientation);
+        }
         switch(ifd.type) {
             case 0: // WhiteIsZero
             case 1: // BlackIsZero

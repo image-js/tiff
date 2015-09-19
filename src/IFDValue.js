@@ -2,7 +2,7 @@
 
 var types = new Map([
     [1 , [1, readByte]],    // BYTE
-    [2 , [1, unreachable]], // ASCII
+    [2 , [1, readASCII]], // ASCII
     [3 , [2, readShort]],   // SHORT
     [4 , [4, readLong]],    // LONG
     [5 , [8, unreachable]], // RATIONAL
@@ -30,6 +30,25 @@ function readByte(decoder, count) {
         array[i] = decoder.readUint8();
     }
     return array;
+}
+
+function readASCII(decoder, count) {
+    var strings = [];
+    var currentString = '';
+    for (var i = 0; i < count; i++) {
+        var char = String.fromCharCode(decoder.readUint8());
+        if (char === '\0') {
+            strings.push(currentString);
+            currentString = '';
+        } else {
+            currentString += char;
+        }
+    }
+    if (strings.length === 1) {
+        return strings[0];
+    } else {
+        return strings;
+    }
 }
 
 function readShort(decoder, count) {
