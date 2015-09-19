@@ -1,14 +1,9 @@
 'use strict';
 
-const Buffer = require('buffer').Buffer;
-
 class BinaryReader {
     constructor(imageData) {
-        if (Buffer.isBuffer(imageData)) {
+        if (imageData.buffer) {
             imageData = imageData.buffer;
-        }
-        if (!(imageData instanceof ArrayBuffer)) {
-            throw new Error('Expecting an ArrayBuffer');
         }
         this.data = new DataView(imageData);
         this.offset = 0;
@@ -33,6 +28,10 @@ class BinaryReader {
 
     setBigEndian() {
         this.littleEndian = false;
+    }
+
+    setLittleEndian() {
+        this.littleEndian = true;
     }
 
     forward(n) {
