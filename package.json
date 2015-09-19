@@ -1,0 +1,22 @@
+{
+  "name": "tiff",
+  "version": "0.0.0",
+  "description": "TIFF image decoder written entirely in JavaScript",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/targos/tiff-js.git"
+  },
+  "author": "Michaël Zasso",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/targos/tiff-js/issues"
+  },
+  "homepage": "https://github.com/targos/tiff-js#readme",
+  "devDependencies": {
+    "debug": "^2.2.0"
+  }
+}
