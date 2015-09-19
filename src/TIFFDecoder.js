@@ -82,7 +82,7 @@ class TIFFDecoder extends BinaryReader {
 
         let valueByteLength = IFDValue.getIFDValueByteLength(type, numValues);
         // debug('type ' + type + ', length: ' + valueByteLength);
-        if (valueByteLength > 4) {
+        if (valueByteLength > 32) {
             this.goto(this.readUint32());
         }
 
