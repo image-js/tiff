@@ -16,7 +16,7 @@ $ npm install tiff
 ### Platform
 
 This package is written using ES2015 features. It is natively compatible with recent versions of Google Chrome
-and Node.js v4. You can transpile it with a tool like [babel](https://babeljs.io/) if you need to support more
+and Node.js. You can transpile it with a tool like [babel](https://babeljs.io/) if you need to support more
 JavaScript engines.
 
 ### TIFF standard
@@ -38,7 +38,7 @@ Decodes the file and returns a TIFF instance.
 
 ### TIFF object
 
-The TIFF object has an `ifd` (Image File Directory) which is an array containing all subimages.
+The TIFF object has an `ifd` (Image File Directory) property which is an array containing all subimages.
 
 ### IFD object
 
