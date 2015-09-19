@@ -63,7 +63,7 @@ class TIFFDecoder extends BinaryReader {
         let numValues = this.readUint32();
 
         // todo support other types
-        if (type !== 1 && type !== 2 && type !== 3 && type !== 4) {
+        if (type < 1 || type > 5) {
             this.forward(4);
             return;
         }

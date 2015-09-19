@@ -5,7 +5,7 @@ var types = new Map([
     [2 , [1, readASCII]], // ASCII
     [3 , [2, readShort]],   // SHORT
     [4 , [4, readLong]],    // LONG
-    [5 , [8, unreachable]], // RATIONAL
+    [5 , [8, readRational]], // RATIONAL
     [6 , [1, unreachable]], // SBYTE
     [7 , [1, unreachable]], // UNDEFINED
     [8 , [2, unreachable]], // SSHORT
@@ -67,6 +67,23 @@ function readLong(decoder, count) {
         array[i] = decoder.readUint32();
     }
     return array;
+}
+
+function readRational(decoder, count) {
+    if (count === 1) {
+        return [
+            decoder.readUint32(),
+            decoder.readUint32()
+        ];
+    }
+    var rationals = new Array(count);
+    for (var i = 0; i < count; i++) {
+        rationals[i] = [
+            decoder.readUint32(),
+            decoder.readUint32()
+        ];
+    }
+    return rationals;
 }
 
 function unreachable() {

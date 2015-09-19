@@ -47,8 +47,14 @@ class IFD {
     get type() {
         return this.fields.get(262);
     }
+    get fillOrder() {
+        return this.fields.get(266) || 1;
+    }
     get documentName() {
         return this.fields.get(269);
+    }
+    get imageDescription() {
+        return this.fields.get(270);
     }
     get stripOffsets() {
         return alwaysArray(this.fields.get(273));
