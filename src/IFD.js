@@ -92,6 +92,9 @@ class IFD {
     get dateTime() {
         return this.fields.get(306);
     }
+    get predictor() {
+        return this.fields.get(317) || 1;
+    }
     get sampleFormat() {
         return this.fields.get(339) || 1;
     }

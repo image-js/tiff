@@ -85,7 +85,6 @@ class TIFFDecoder extends BinaryReader {
             unsupported('orientation', orientation);
         }
         switch(ifd.type) {
-            case 0: // WhiteIsZero
             case 1: // BlackIsZero
                 this.decodeBilevelOrGrey(ifd);
                 break;
