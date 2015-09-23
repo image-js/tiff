@@ -15,5 +15,8 @@
   "bugs": {
     "url": "https://github.com/targos/tiff-js/issues"
   },
-  "homepage": "https://github.com/targos/tiff-js#readme"
+  "homepage": "https://github.com/targos/tiff-js#readme",
+  "dependencies": {
+    "iobuffer": "^1.0.0"
+  }
 }

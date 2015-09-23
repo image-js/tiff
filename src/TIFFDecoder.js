@@ -1,11 +1,11 @@
 'use strict';
 
-const BinaryReader = require('./BinaryReader');
+const InputBuffer = require('iobuffer').InputBuffer;
 const IFD = require('./IFD');
 const IFDValue = require('./IFDValue');
 const TIFF = require('./TIFF');
 
-class TIFFDecoder extends BinaryReader {
+class TIFFDecoder extends InputBuffer {
     constructor(data) {
         super(data);
         this.decoded = false;
@@ -45,7 +45,7 @@ class TIFFDecoder extends BinaryReader {
     }
 
     decodeIFD() {
-        this.goto(this.nextIFD);
+        this.seek(this.nextIFD);
         var ifd = new IFD();
         this.tiff.ifd.push(ifd);
         const numEntries = this.readUint16();
@@ -57,26 +57,27 @@ class TIFFDecoder extends BinaryReader {
     }
 
     decodeIFDEntry(ifd) {
-        let offset = this.offset;
+        this.mark();
         let tag = this.readUint16();
         let type = this.readUint16();
         let numValues = this.readUint32();
 
         if (type < 1 || type > 12) {
-            this.forward(4); // unknown type, skip this value
+            this.skip(4); // unknown type, skip this value
             return;
         }
 
         let valueByteLength = IFDValue.getByteLength(type, numValues);
         if (valueByteLength > 4) {
-            this.goto(this.readUint32());
+            this.seek(this.readUint32());
         }
 
         var value = IFDValue.readData(this, type, numValues);
         ifd.fields.set(tag, value);
 
-        // goto offset of next entry
-        this.goto(offset + 12);
+        // go to the next entry
+        this.reset();
+        this.skip(12);
     }
 
     decodeImageData(ifd) {
@@ -129,7 +130,7 @@ class TIFFDecoder extends BinaryReader {
     getStripData(compression, offset, byteCounts) {
         switch (compression) {
             case 1: // No compression
-                return new DataView(this.data.buffer, offset, byteCounts);
+                return new DataView(this._data.buffer, offset, byteCounts);
                 break;
             case 2: // CCITT Group 3 1-Dimensional Modified Huffman run length encoding
             case 32773: // PackBits compression
