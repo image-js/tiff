@@ -118,7 +118,7 @@ class TIFFDecoder extends InputBuffer {
             if (bitDepth === 8) {
                 pixel = fill8bit(data, stripData, pixel, length);
             } else if (bitDepth === 16) {
-                pixel = fill16bit(data, stripData, pixel, length, this._littleEndian);
+                pixel = fill16bit(data, stripData, pixel, length, this.isLittleEndian());
             } else {
                 unsupported('bitDepth: ', bitDepth);
             }
