@@ -8,14 +8,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/targos/tiff-js.git"
+    "url": "git+https://github.com/image-js/tiff-js.git"
   },
   "author": "Michaël Zasso",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/targos/tiff-js/issues"
+    "url": "https://github.com/image-js/tiff-js/issues"
   },
-  "homepage": "https://github.com/targos/tiff-js#readme",
+  "homepage": "https://github.com/image-js/tiff-js#readme",
   "dependencies": {
     "iobuffer": "^1.0.1"
   }
