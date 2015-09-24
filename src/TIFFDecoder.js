@@ -8,19 +8,19 @@ const TIFF = require('./TIFF');
 class TIFFDecoder extends InputBuffer {
     constructor(data) {
         super(data);
-        this.decoded = false;
-        this.tiff = null;
-        this.nextIFD = 0;
+        this._decoded = false;
+        this._tiff = null;
+        this._nextIFD = 0;
     }
 
     decode() {
-        if (this.decoded) return this.tiff;
-        this.tiff = new TIFF();
+        if (this._decoded) return this._tiff;
+        this._tiff = new TIFF();
         this.decodeHeader();
-        while (this.nextIFD) {
+        while (this._nextIFD) {
             this.decodeIFD();
         }
-        return this.tiff;
+        return this._tiff;
     }
 
     decodeHeader() {
@@ -41,19 +41,19 @@ class TIFFDecoder extends InputBuffer {
         }
 
         // Offset of the first IFD
-        this.nextIFD = this.readUint32();
+        this._nextIFD = this.readUint32();
     }
 
     decodeIFD() {
-        this.seek(this.nextIFD);
+        this.seek(this._nextIFD);
         var ifd = new IFD();
-        this.tiff.ifd.push(ifd);
+        this._tiff.ifd.push(ifd);
         const numEntries = this.readUint16();
         for (var i = 0; i < numEntries; i++) {
             this.decodeIFDEntry(ifd);
         }
         this.decodeImageData(ifd);
-        this.nextIFD = this.readUint32();
+        this._nextIFD = this.readUint32();
     }
 
     decodeIFDEntry(ifd) {
@@ -118,7 +118,7 @@ class TIFFDecoder extends InputBuffer {
             if (bitDepth === 8) {
                 pixel = fill8bit(data, stripData, pixel, length);
             } else if (bitDepth === 16) {
-                pixel = fill16bit(data, stripData, pixel, length, this.littleEndian);
+                pixel = fill16bit(data, stripData, pixel, length, this._littleEndian);
             } else {
                 unsupported('bitDepth: ', bitDepth);
             }
@@ -130,7 +130,7 @@ class TIFFDecoder extends InputBuffer {
     getStripData(compression, offset, byteCounts) {
         switch (compression) {
             case 1: // No compression
-                return new DataView(this._data.buffer, offset, byteCounts);
+                return new DataView(this.buffer, offset, byteCounts);
                 break;
             case 2: // CCITT Group 3 1-Dimensional Modified Huffman run length encoding
             case 32773: // PackBits compression
