@@ -1,9 +1,11 @@
 {
   "name": "tiff",
-  "version": "0.0.2",
+  "version": "1.0.0",
   "description": "TIFF image decoder written entirely in JavaScript",
   "main": "src/index.js",
-  "files": ["src"],
+  "files": [
+    "src"
+  ],
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 0"
   },
