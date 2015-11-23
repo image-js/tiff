@@ -17,6 +17,6 @@
   },
   "homepage": "https://github.com/image-js/tiff-js#readme",
   "dependencies": {
-    "iobuffer": "^1.0.1"
+    "iobuffer": "^2.0.0"
   }
 }
