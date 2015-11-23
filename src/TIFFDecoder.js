@@ -1,11 +1,11 @@
 'use strict';
 
-const InputBuffer = require('iobuffer').InputBuffer;
+const IOBuffer = require('iobuffer');
 const IFD = require('./IFD');
 const IFDValue = require('./IFDValue');
 const TIFF = require('./TIFF');
 
-class TIFFDecoder extends InputBuffer {
+class TIFFDecoder extends IOBuffer {
     constructor(data) {
         super(data);
         this._decoded = false;
