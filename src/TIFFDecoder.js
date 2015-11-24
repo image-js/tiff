@@ -119,6 +119,8 @@ class TIFFDecoder extends IOBuffer {
                 pixel = fill8bit(data, stripData, pixel, length);
             } else if (bitDepth === 16) {
                 pixel = fill16bit(data, stripData, pixel, length, this.isLittleEndian());
+            } else if (bitDepth === 32) {
+                pixel = fill32bit(data, stripData, pixel, length, this.isLittleEndian());
             } else {
                 unsupported('bitDepth: ', bitDepth);
             }
@@ -149,6 +151,8 @@ function getDataArray(size, channels, bitDepth) {
         return new Uint8Array(size * channels);
     } else if (bitDepth === 16) {
         return new Uint16Array(size * channels);
+    } else if (bitDepth === 32) {
+        return new Uint32Array(size * channels);
     } else {
         unsupported('bit depth', bitDepth);
     }
@@ -164,6 +168,13 @@ function fill8bit(dataTo, dataFrom, index, length) {
 function fill16bit(dataTo, dataFrom, index, length, littleEndian) {
     for (var i = 0; i < length * 2; i += 2) {
         dataTo[index++] = dataFrom.getUint16(i, littleEndian);
+    }
+    return index;
+}
+
+function fill32bit(dataTo, dataFrom, index, length, littleEndian) {
+    for (var i = 0; i < length * 4; i += 4) {
+        dataTo[index++] = dataFrom.getUint32(i, littleEndian);
     }
     return index;
 }
