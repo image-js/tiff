@@ -100,8 +100,9 @@ class TIFFDecoder extends IOBuffer {
         const height = ifd.height;
 
         const bitDepth = ifd.bitsPerSample;
+        const sampleFormat = ifd.sampleFormat;
         let size = width * height;
-        const data = getDataArray(size, 1, bitDepth);
+        const data = getDataArray(size, 1, bitDepth, sampleFormat);
 
         const compression = ifd.compression;
         const rowsPerStrip = ifd.rowsPerStrip;
@@ -119,10 +120,10 @@ class TIFFDecoder extends IOBuffer {
                 pixel = fill8bit(data, stripData, pixel, length);
             } else if (bitDepth === 16) {
                 pixel = fill16bit(data, stripData, pixel, length, this.isLittleEndian());
-            } else if (bitDepth === 32) {
-                pixel = fill32bit(data, stripData, pixel, length, this.isLittleEndian());
+            } else if (bitDepth === 32 && sampleFormat === 3) {
+                pixel = fillFloat32(data, stripData, pixel, length, this.isLittleEndian());
             } else {
-                unsupported('bitDepth: ', bitDepth);
+                unsupported('bitDepth', bitDepth);
             }
         }
 
@@ -146,15 +147,15 @@ class TIFFDecoder extends IOBuffer {
 
 module.exports = TIFFDecoder;
 
-function getDataArray(size, channels, bitDepth) {
+function getDataArray(size, channels, bitDepth, sampleFormat) {
     if (bitDepth === 8) {
         return new Uint8Array(size * channels);
     } else if (bitDepth === 16) {
         return new Uint16Array(size * channels);
-    } else if (bitDepth === 32) {
-        return new Uint32Array(size * channels);
+    } else if (bitDepth === 32 && sampleFormat === 3) {
+        return new Float32Array(size * channels);
     } else {
-        unsupported('bit depth', bitDepth);
+        unsupported('bit depth / sample format', bitDepth + ' / ' + sampleFormat);
     }
 }
 
@@ -172,9 +173,9 @@ function fill16bit(dataTo, dataFrom, index, length, littleEndian) {
     return index;
 }
 
-function fill32bit(dataTo, dataFrom, index, length, littleEndian) {
+function fillFloat32(dataTo, dataFrom, index, length, littleEndian) {
     for (var i = 0; i < length * 4; i += 4) {
-        dataTo[index++] = dataFrom.getUint32(i, littleEndian);
+        dataTo[index++] = dataFrom.getFloat32(i, littleEndian);
     }
     return index;
 }

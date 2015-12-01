@@ -75,7 +75,7 @@ class IFD {
         return this.fields.get(280) || 0;
     }
     get maxSampleValue() {
-        return this.fields.get(281) || (1 << this.bitsPerSample) - 1;
+        return this.fields.get(281) || Math.pow(2, this.bitsPerSample) - 1;
     }
     get xResolution() {
         return this.fields.get(282);
