@@ -21,7 +21,7 @@ JavaScript engines.
 
 ### TIFF standard
 
-Currently, only greyscale images (8 or 16 bits) can be decoded.
+Currently, only greyscale images (8, 16 or 32 bits) can be decoded.
 
 ## API
 
@@ -46,8 +46,7 @@ Each decoded image is stored in an `IFD`.
 
 #### IFD#data
 
-The `data` property is a Typed Array containing the pixel data. It is a `Uint8Array` for 8bit images
-and a `Uint16Array` for 16bit images.
+The `data` property is a Typed Array containing the pixel data. It is a `Uint8Array` for 8bit images, a `Uint16Array` for 16bit images and a `Float32Array` for 32bit images.
 
 #### Other properties of IFD
 
