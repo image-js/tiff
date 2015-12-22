@@ -3,27 +3,14 @@
 const fs = require('fs');
 const TIFFDecoder = require('..').TIFFDecoder;
 
-var img = fs.readFileSync(__dirname + '/img/vol_denoised_dfof_0.tif');
+const files = ['grey8.tif', 'grey16.tif'];
+const dir = __dirname + '/img/';
 
-var decoder = new TIFFDecoder(img);
-var result = decoder.decode();
-
-var first = result.ifd[0];
-
-console.log(first.sampleFormat);
-
-console.log(first.minSampleValue);
-console.log(first.maxSampleValue);
-
-console.log((first.bitsPerSample));
-
-console.log(first.sMinSampleValue);
-console.log(first.sMaxSampleValue);
-
-//for (var ifd of result.ifd) {
-  //  console.log(ifd)
-    //console.log(ifd.sampleFormat);
-//}
-
-//console.log(result.ifd[0].fields);
-//console.log(result.ifd[0].data.slice(0, 10));
+describe('TIFF decoder', function () {
+    for (var i = 0; i < files.length; i++) {
+        const file = fs.readFileSync(dir + files[i]);
+        const decoder = new TIFFDecoder(file);
+        const result = decoder.decode();
+        result.ifd.length.should.equal(1);
+    }
+});
