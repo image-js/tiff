@@ -42,7 +42,7 @@ class IFD {
         return this.fields.get(258);
     }
     get compression() {
-        return this.fields.get(259);
+        return this.fields.get(259) || 1;
     }
     get type() {
         return this.fields.get(262);
