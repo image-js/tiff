@@ -23,7 +23,7 @@
     "iobuffer": "^2.0.0"
   },
   "devDependencies": {
-    "mocha": "^2.3.4",
+    "mocha": "^2.5.0",
     "mocha-better-spec-reporter": "^3.0.1",
     "should": "^8.0.2"
   }
