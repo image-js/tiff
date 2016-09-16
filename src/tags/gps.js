@@ -1,6 +1,6 @@
 'use strict';
 
-module.exports = {
+const tagsById = {
     0x0000: 'GPSVersionID',
     0x0001: 'GPSLatitudeRef',
     0x0002: 'GPSLatitude',
@@ -33,4 +33,14 @@ module.exports = {
     0x001D: 'GPSDateStamp',
     0x001E: 'GPSDifferential',
     0x001F: 'GPSHPositioningError'
+};
+
+const tagsByName = {};
+for (var i in tagsById) {
+    tagsByName[tagsById[i]] = i;
+}
+
+module.exports = {
+    tagsById,
+    tagsByName
 };

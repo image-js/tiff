@@ -1,6 +1,6 @@
 'use strict';
 
-module.exports = {
+const tagsById = {
     // Baseline tags
     0x00FE: 'NewSubfileType',
     0x00FF: 'SubfileType',
@@ -175,4 +175,14 @@ module.exports = {
     0xC65B: 'CalibrationIlluminant2',
     0xC65C: 'BestQualityScale',
     0xC660: 'AliasLayerMetadata'
+};
+
+const tagsByName = {};
+for (var i in tagsById) {
+    tagsByName[tagsById[i]] = i;
+}
+
+module.exports = {
+    tagsById,
+    tagsByName
 };

@@ -1,6 +1,6 @@
 'use strict';
 
-module.exports = {
+const tagsById = {
     0x829A: 'ExposureTime',
     0x829D: 'FNumber',
     0x8822: 'ExposureProgram',
@@ -70,4 +70,14 @@ module.exports = {
     0xA434: 'LensModel',
     0xA435: 'LensSerialNumber',
     0xA500: 'Gamma'
+};
+
+const tagsByName = {};
+for (var i in tagsById) {
+    tagsByName[tagsById[i]] = i;
+}
+
+module.exports = {
+    tagsById,
+    tagsByName
 };
