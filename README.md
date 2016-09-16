@@ -4,7 +4,7 @@
   [![build status][travis-image]][travis-url]
   [![npm download][download-image]][download-url]
 
-TIFF image decoder written entirely in JavaScript
+TIFF image decoder written entirely in JavaScript.
 
 ## Installation
 
@@ -26,30 +26,22 @@ Currently, only greyscale images (8, 16 or 32 bits) can be decoded.
 
 ## API
 
-The package is in early development and API should be considered entirely unstable.  
+The package is in early development and API should be considered unstable.  
 I am currently only focused on extending TIFF format support and will work on the API afterwards.
 
-### new tiff.TIFFDecoder(ArrayBuffer|Buffer)
+### tiff.decode(data[, options])
 
-Returns a new decoder instance.
+Decodes the file and returns TIFF IFDs.
 
-#### TIFFDecoder#decode()
-
-Decodes the file and returns a TIFF instance.
-
-### TIFF object
-
-The TIFF object has an `ifd` (Image File Directory) property which is an array containing all subimages.
-
-### IFD object
+#### IFD object
 
 Each decoded image is stored in an `IFD`.
 
-#### IFD#data
+##### IFD#data
 
 The `data` property is a Typed Array containing the pixel data. It is a `Uint8Array` for 8bit images, a `Uint16Array` for 16bit images and a `Float32Array` for 32bit images.
 
-#### Other properties of IFD
+##### Other properties of IFD
 
 * `size` - number of pixels
 * `width` - number of columns

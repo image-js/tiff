@@ -3,24 +3,29 @@
 const IOBuffer = require('iobuffer');
 const IFD = require('./IFD');
 const IFDValue = require('./IFDValue');
-const TIFF = require('./TIFF');
+
+const defaultOptions = {
+    ignoreImageData: false,
+    onlyFirst: false
+};
 
 class TIFFDecoder extends IOBuffer {
     constructor(data) {
         super(data);
-        this._decoded = false;
-        this._tiff = null;
         this._nextIFD = 0;
     }
 
-    decode() {
-        if (this._decoded) return this._tiff;
-        this._tiff = new TIFF();
+    decode(options) {
+        options = Object.assign({}, defaultOptions, options);
+        const result = [];
         this.decodeHeader();
         while (this._nextIFD) {
-            this.decodeIFD();
+            result.push(this.decodeIFD(options));
+            if (options.onlyFirst) {
+                return result[0];
+            }
         }
-        return this._tiff;
+        return result;
     }
 
     decodeHeader() {
@@ -44,16 +49,18 @@ class TIFFDecoder extends IOBuffer {
         this._nextIFD = this.readUint32();
     }
 
-    decodeIFD() {
+    decodeIFD(options) {
         this.seek(this._nextIFD);
         var ifd = new IFD();
-        this._tiff.ifd.push(ifd);
         const numEntries = this.readUint16();
         for (var i = 0; i < numEntries; i++) {
             this.decodeIFDEntry(ifd);
         }
-        this.decodeImageData(ifd);
+        if (!options.ignoreImageData) {
+            this.decodeImageData(ifd);
+        }
         this._nextIFD = this.readUint32();
+        return ifd;
     }
 
     decodeIFDEntry(ifd) {

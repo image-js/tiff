@@ -1,14 +1,16 @@
 'use strict';
 
 const fs = require('fs');
-const TIFFDecoder = require('..').TIFFDecoder;
+const TIFFDecoder = require('.').TIFFDecoder;
 
-var img = fs.readFileSync(__dirname + '/img/vol_denoised_dfof_0.tif');
+var img = fs.readFileSync(__dirname + '/test/img/grey8.tif');
 
 var decoder = new TIFFDecoder(img);
 var result = decoder.decode();
 
 var first = result.ifd[0];
+
+console.log(first.fields.get(0x8769) ? true : false);
 
 console.log(first.sampleFormat);
 

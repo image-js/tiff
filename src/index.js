@@ -1,3 +1,3 @@
 'use strict';
 
-exports.TIFFDecoder = require('./TIFFDecoder');
+exports.decode = require('./decode');
