@@ -3,6 +3,6 @@
 const TIFFDecoder = require('./tiffDecoder');
 
 module.exports = function decodeTIFF(data, options) {
-    const decoder = new TIFFDecoder(data);
+    const decoder = new TIFFDecoder(data, options);
     return decoder.decode(options);
 };

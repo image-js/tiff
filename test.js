@@ -3,11 +3,14 @@
 const fs = require('fs');
 const decode = require('.').decode;
 
-var img = fs.readFileSync(__dirname + '/test/img/grey8.tif');
-
+var img = fs.readFileSync(__dirname + '/Filipin G cyto - n000000.tif');
 var result = decode(img);
 var first = result[0];
 
+console.log(first.map);
+console.log(first.exif.map);
+
+/*
 console.log(first.fields.get(0x8769) ? true : false);
 
 console.log(first.sampleFormat);
@@ -19,7 +22,7 @@ console.log((first.bitsPerSample));
 
 console.log(first.sMinSampleValue);
 console.log(first.sMaxSampleValue);
-
+*/
 //for (var ifd of result.ifd) {
   //  console.log(ifd)
     //console.log(ifd.sampleFormat);
