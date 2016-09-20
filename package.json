@@ -20,7 +20,7 @@
   },
   "homepage": "https://github.com/image-js/tiff-js#readme",
   "dependencies": {
-    "iobuffer": "^2.0.0"
+    "iobuffer": "^2.1.0"
   },
   "devDependencies": {
     "mocha": "^3.0.2",

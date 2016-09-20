@@ -1,10 +1,12 @@
 'use strict';
 
+const Ifd = require('./ifd');
+
 const dateTimeRegex = /^(\d{4}):(\d{2}):(\d{2}) (\d{2}):(\d{2}):(\d{2})$/;
 
-class IFD {
+class TiffIfd extends Ifd {
     constructor() {
-        this.fields = new Map();
+        super('standard');
     }
 
     // Custom fields
@@ -106,9 +108,9 @@ class IFD {
     }
 }
 
-module.exports = IFD;
-
 function alwaysArray(value) {
     if (typeof value === 'number') return [value];
     return value;
 }
+
+module.exports = TiffIfd;

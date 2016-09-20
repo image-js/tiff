@@ -1,6 +1,6 @@
 'use strict';
 
-const TIFFDecoder = require('./TIFFDecoder');
+const TIFFDecoder = require('./tiffDecoder');
 
 module.exports = function decodeTIFF(data, options) {
     const decoder = new TIFFDecoder(data);

@@ -1,14 +1,12 @@
 'use strict';
 
 const fs = require('fs');
-const TIFFDecoder = require('.').TIFFDecoder;
+const decode = require('.').decode;
 
 var img = fs.readFileSync(__dirname + '/test/img/grey8.tif');
 
-var decoder = new TIFFDecoder(img);
-var result = decoder.decode();
-
-var first = result.ifd[0];
+var result = decode(img);
+var first = result[0];
 
 console.log(first.fields.get(0x8769) ? true : false);
 

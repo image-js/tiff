@@ -1,8 +1,9 @@
 'use strict';
 
 const IOBuffer = require('iobuffer');
-const IFD = require('./IFD');
-const IFDValue = require('./IFDValue');
+const IFD = require('./ifd');
+const TiffIFD = require('./tiffIfd');
+const IFDValue = require('./ifdValue');
 
 const defaultOptions = {
     ignoreImageData: false,
@@ -10,8 +11,8 @@ const defaultOptions = {
 };
 
 class TIFFDecoder extends IOBuffer {
-    constructor(data) {
-        super(data);
+    constructor(data, options) {
+        super(data, options);
         this._nextIFD = 0;
     }
 
@@ -51,7 +52,14 @@ class TIFFDecoder extends IOBuffer {
 
     decodeIFD(options) {
         this.seek(this._nextIFD);
-        var ifd = new IFD();
+
+        var ifd;
+        if (!options.kind) {
+            ifd = new TiffIFD();
+        } else {
+            ifd = new IFD(options.kind);
+        }
+
         const numEntries = this.readUint16();
         for (var i = 0; i < numEntries; i++) {
             this.decodeIFDEntry(ifd);
@@ -64,26 +72,43 @@ class TIFFDecoder extends IOBuffer {
     }
 
     decodeIFDEntry(ifd) {
-        this.mark();
-        let tag = this.readUint16();
-        let type = this.readUint16();
-        let numValues = this.readUint32();
+        const offset = this.offset;
+        const tag = this.readUint16();
+        const type = this.readUint16();
+        const numValues = this.readUint32();
 
         if (type < 1 || type > 12) {
             this.skip(4); // unknown type, skip this value
             return;
         }
 
-        let valueByteLength = IFDValue.getByteLength(type, numValues);
+        const valueByteLength = IFDValue.getByteLength(type, numValues);
         if (valueByteLength > 4) {
             this.seek(this.readUint32());
         }
 
-        var value = IFDValue.readData(this, type, numValues);
+        const value = IFDValue.readData(this, type, numValues);
         ifd.fields.set(tag, value);
 
+        // Read sub-IFDs
+        if (tag === 0x8769 || tag === 0x8825) {
+            let currentOffset = this.offset;
+            let kind;
+            if (tag === 0x8769) {
+                kind = 'exif';
+            } else if (tag === 0x8825) {
+                kind = 'gps';
+            }
+            this._nextIFD = value;
+            ifd[kind] = this.decodeIFD({
+                kind,
+                ignoreImageData: true
+            });
+            this.offset = currentOffset;
+        }
+
         // go to the next entry
-        this.reset();
+        this.seek(offset);
         this.skip(12);
     }
 

@@ -1,6 +1,7 @@
 'use strict';
 
 const fs = require('fs');
+const should = require('should');
 const tiff = require('..');
 
 const files = ['grey8.tif', 'grey16.tif'];
@@ -21,6 +22,14 @@ describe('TIFF decoder', function () {
     });
     it('should omit data', function () {
         const result = tiff.decode(contents[0], {ignoreImageData: true});
-        result.should.not.have.property('data');
+        should(result[0].data).equal(null);
+    });
+    it('should read exif data', function () {
+        const result = tiff.decode(contents[0], {onlyFirst: true, ignoreImageData: true});
+        result.exif.map.should.eql({
+            ColorSpace: 65535,
+            PixelXDimension: 30,
+            PixelYDimension: 90
+        });
     });
 });
