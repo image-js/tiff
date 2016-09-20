@@ -71,17 +71,11 @@ function readLong(decoder, count) {
 
 function readRational(decoder, count) {
     if (count === 1) {
-        return [
-            decoder.readUint32(),
-            decoder.readUint32()
-        ];
+        return decoder.readUint32() / decoder.readUint32();
     }
     var rationals = new Array(count);
     for (var i = 0; i < count; i++) {
-        rationals[i] = [
-            decoder.readUint32(),
-            decoder.readUint32()
-        ];
+        rationals[i] = decoder.readUint32() / decoder.readUint32();
     }
     return rationals;
 }
@@ -115,17 +109,11 @@ function readSLong(decoder, count) {
 
 function readSRational(decoder, count) {
     if (count === 1) {
-        return [
-            decoder.readInt32(),
-            decoder.readInt32()
-        ];
+        return decoder.readInt32() / decoder.readInt32();
     }
     var rationals = new Array(count);
     for (var i = 0; i < count; i++) {
-        rationals[i] = [
-            decoder.readInt32(),
-            decoder.readInt32()
-        ];
+        rationals[i] = decoder.readInt32() / decoder.readInt32();
     }
     return rationals;
 }
