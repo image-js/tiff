@@ -7,7 +7,10 @@
     "src"
   ],
   "scripts": {
-    "test": "mocha --require should --reporter mocha-better-spec-reporter --recursive"
+    "eslint": "eslint src test",
+    "eslint-fix": "npm run eslint -- --fix",
+    "test": "npm run test-mocha && npm run eslint",
+    "test-mocha": "mocha --require should --reporter mocha-better-spec-reporter --recursive"
   },
   "repository": {
     "type": "git",
@@ -23,6 +26,9 @@
     "iobuffer": "^2.1.0"
   },
   "devDependencies": {
+    "eslint": "^3.8.1",
+    "eslint-config-cheminfo": "^1.5.2",
+    "eslint-plugin-no-only-tests": "^1.1.0",
     "mocha": "^3.0.2",
     "mocha-better-spec-reporter": "^3.0.2",
     "should": "^11.1.0"

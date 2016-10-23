@@ -32,7 +32,7 @@ class TiffIfd extends Ifd {
 
     // IFD fields
     get newSubfileType() {
-        return this.fields.get(254)
+        return this.fields.get(254);
     }
     get imageWidth() {
         return this.fields.get(256);

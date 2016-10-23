@@ -22,6 +22,8 @@ class IFD {
             return this.fields.get(tag);
         } else if (typeof tag === 'string') {
             return this.fields.get(tags[this.kind].tagsByName[tag]);
+        } else {
+            throw new Error('expected a number or string');
         }
     }
 

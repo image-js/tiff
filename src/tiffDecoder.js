@@ -117,7 +117,7 @@ class TIFFDecoder extends IOBuffer {
         if (orientation && orientation !== 1) {
             unsupported('orientation', orientation);
         }
-        switch(ifd.type) {
+        switch (ifd.type) {
             case 1: // BlackIsZero
                 this.decodeBilevelOrGrey(ifd);
                 break;
@@ -166,11 +166,9 @@ class TIFFDecoder extends IOBuffer {
         switch (compression) {
             case 1: // No compression
                 return new DataView(this.buffer, offset, byteCounts);
-                break;
             case 2: // CCITT Group 3 1-Dimensional Modified Huffman run length encoding
             case 32773: // PackBits compression
-                unsupported('Compression', compression);
-                break;
+                return unsupported('Compression', compression);
             default:
                 throw new Error('invalid compression: ' + compression);
         }
@@ -187,7 +185,7 @@ function getDataArray(size, channels, bitDepth, sampleFormat) {
     } else if (bitDepth === 32 && sampleFormat === 3) {
         return new Float32Array(size * channels);
     } else {
-        unsupported('bit depth / sample format', bitDepth + ' / ' + sampleFormat);
+        return unsupported('bit depth / sample format', bitDepth + ' / ' + sampleFormat);
     }
 }
 
