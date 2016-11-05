@@ -22,7 +22,7 @@ JavaScript engines.
 
 ### TIFF standard
 
-Currently, only greyscale images (8, 16 or 32 bits) can be decoded.
+The library can currently decode greyscale and RGB images (8, 16 or 32 bits). It does not support any compression algorithm yet.
 
 ## API
 
