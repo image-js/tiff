@@ -119,7 +119,8 @@ class TIFFDecoder extends IOBuffer {
         }
         switch (ifd.type) {
             case 1: // BlackIsZero
-                this.decodeBilevelOrGrey(ifd);
+            case 2: // RGB
+                this.readStripData(ifd);
                 break;
             default:
                 unsupported('image type', ifd.type);
@@ -127,11 +128,11 @@ class TIFFDecoder extends IOBuffer {
         }
     }
 
-    decodeBilevelOrGrey(ifd) {
+    readStripData(ifd) {
         const width = ifd.width;
         const height = ifd.height;
 
-        const bitDepth = ifd.bitsPerSample;
+        const bitDepth = validateBitDepth(ifd.bitsPerSample);
         const sampleFormat = ifd.sampleFormat;
         let size = width * height;
         const data = getDataArray(size, 1, bitDepth, sampleFormat);
@@ -212,4 +213,17 @@ function fillFloat32(dataTo, dataFrom, index, length, littleEndian) {
 
 function unsupported(type, value) {
     throw new Error('Unsupported ' + type + ': ' + value);
+}
+
+function validateBitDepth(bitDepth) {
+    if (bitDepth.length) {
+        const bitDepthArray = bitDepth;
+        bitDepth = bitDepthArray[0];
+        for (var i = 0; i < bitDepthArray.length; i++) {
+            if (bitDepthArray[i] !== bitDepth) {
+                unsupported('bit depth', bitDepthArray);
+            }
+        }
+    }
+    return bitDepth;
 }
