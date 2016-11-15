@@ -31,7 +31,7 @@ class TIFFDecoder extends IOBuffer {
 
     decodeHeader() {
         // Byte offset
-        let value = this.readUint16();
+        const value = this.readUint16();
         if (value === 0x4949) {
             this.setLittleEndian();
         } else if (value === 0x4D4D) {
@@ -41,8 +41,7 @@ class TIFFDecoder extends IOBuffer {
         }
 
         // Magic number
-        value = this.readUint16();
-        if (value !== 42) {
+        if (this.readUint16() !== 42) {
             throw new Error('not a TIFF file');
         }
 
@@ -115,7 +114,7 @@ class TIFFDecoder extends IOBuffer {
     decodeImageData(ifd) {
         const orientation = ifd.orientation;
         if (orientation && orientation !== 1) {
-            unsupported('orientation', orientation);
+            throw unsupported('orientation', orientation);
         }
         switch (ifd.type) {
             case 1: // BlackIsZero
@@ -123,8 +122,7 @@ class TIFFDecoder extends IOBuffer {
                 this.readStripData(ifd);
                 break;
             default:
-                unsupported('image type', ifd.type);
-                break;
+                throw unsupported('image type', ifd.type);
         }
     }
 
@@ -134,7 +132,7 @@ class TIFFDecoder extends IOBuffer {
 
         const bitDepth = validateBitDepth(ifd.bitsPerSample);
         const sampleFormat = ifd.sampleFormat;
-        let size = width * height;
+        const size = width * height;
         const data = getDataArray(size, 1, bitDepth, sampleFormat);
 
         const compression = ifd.compression;
@@ -143,35 +141,41 @@ class TIFFDecoder extends IOBuffer {
         const stripOffsets = ifd.stripOffsets;
         const stripByteCounts = ifd.stripByteCounts;
 
+        var remainingPixels = size;
         var pixel = 0;
         for (var i = 0; i < stripOffsets.length; i++) {
-            var stripData = this.getStripData(compression, stripOffsets[i], stripByteCounts[i]);
+            var stripData = new DataView(this.buffer, stripOffsets[i], stripByteCounts[i]);
+
             // Last strip can be smaller
-            var length = size > maxPixels ? maxPixels : size;
-            size -= length;
-            if (bitDepth === 8) {
-                pixel = fill8bit(data, stripData, pixel, length);
-            } else if (bitDepth === 16) {
-                pixel = fill16bit(data, stripData, pixel, length, this.isLittleEndian());
-            } else if (bitDepth === 32 && sampleFormat === 3) {
-                pixel = fillFloat32(data, stripData, pixel, length, this.isLittleEndian());
-            } else {
-                unsupported('bitDepth', bitDepth);
+            var length = remainingPixels > maxPixels ? maxPixels : remainingPixels;
+            remainingPixels -= length;
+
+            switch (compression) {
+                case 1: // No compression
+                    pixel = this.fillUncompressed(bitDepth, sampleFormat, data, stripData, pixel, length);
+                    break;
+                case 5: // LZW
+                    throw unsupported('lzw');
+                case 2: // CCITT Group 3 1-Dimensional Modified Huffman run length encoding
+                case 32773: // PackBits compression
+                    throw unsupported('Compression', compression);
+                default:
+                    throw new Error('invalid compression: ' + compression);
             }
         }
 
         ifd.data = data;
     }
 
-    getStripData(compression, offset, byteCounts) {
-        switch (compression) {
-            case 1: // No compression
-                return new DataView(this.buffer, offset, byteCounts);
-            case 2: // CCITT Group 3 1-Dimensional Modified Huffman run length encoding
-            case 32773: // PackBits compression
-                return unsupported('Compression', compression);
-            default:
-                throw new Error('invalid compression: ' + compression);
+    fillUncompressed(bitDepth, sampleFormat, data, stripData, pixel, length) {
+        if (bitDepth === 8) {
+            return fill8bit(data, stripData, pixel, length);
+        } else if (bitDepth === 16) {
+            return fill16bit(data, stripData, pixel, length, this.isLittleEndian());
+        } else if (bitDepth === 32 && sampleFormat === 3) {
+            return fillFloat32(data, stripData, pixel, length, this.isLittleEndian());
+        } else {
+            throw unsupported('bitDepth', bitDepth);
         }
     }
 }
@@ -186,7 +190,7 @@ function getDataArray(size, channels, bitDepth, sampleFormat) {
     } else if (bitDepth === 32 && sampleFormat === 3) {
         return new Float32Array(size * channels);
     } else {
-        return unsupported('bit depth / sample format', bitDepth + ' / ' + sampleFormat);
+        throw unsupported('bit depth / sample format', bitDepth + ' / ' + sampleFormat);
     }
 }
 
@@ -212,7 +216,7 @@ function fillFloat32(dataTo, dataFrom, index, length, littleEndian) {
 }
 
 function unsupported(type, value) {
-    throw new Error('Unsupported ' + type + ': ' + value);
+    return new Error('Unsupported ' + type + ': ' + value);
 }
 
 function validateBitDepth(bitDepth) {
@@ -221,7 +225,7 @@ function validateBitDepth(bitDepth) {
         bitDepth = bitDepthArray[0];
         for (var i = 0; i < bitDepthArray.length; i++) {
             if (bitDepthArray[i] !== bitDepth) {
-                unsupported('bit depth', bitDepthArray);
+                throw unsupported('bit depth', bitDepthArray);
             }
         }
     }

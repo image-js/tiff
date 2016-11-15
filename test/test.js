@@ -5,6 +5,7 @@ const should = require('should');
 const tiff = require('..');
 
 const files = ['grey8.tif', 'grey16.tif', 'color8.tif', 'color16.tif'];
+// const files = ['color8c.tif'];//'grey8.tif', 'grey16.tif', 'color8.tif', 'color16.tif'];
 const dir = __dirname + '/img/';
 const contents = files.map(file => fs.readFileSync(dir + file));
 
