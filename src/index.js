@@ -1,7 +1,6 @@
 import TIFFDecoder from './tiffDecoder';
 
-function decodeTIFF(data, options) {
-    if (options === undefined) options = {};
+function decodeTIFF(data, options = {}) {
     const decoder = new TIFFDecoder(data, options);
     return decoder.decode(options);
 }
