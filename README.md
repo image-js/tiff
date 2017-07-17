@@ -20,7 +20,7 @@ This package is written using ES2015 features. It is natively compatible with re
 and Node.js. You can transpile it with a tool like [babel](https://babeljs.io/) if you need to support more
 JavaScript engines.
 
-### [TIFF standard](https://partners.adobe.com/public/developer/en/tiff/TIFF6.pdf)
+### [TIFF standard](./TIFF6.pdf)
 
 The library can currently decode greyscale and RGB images (8, 16 or 32 bits). It does not support any compression algorithm yet.
 
