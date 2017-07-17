@@ -1,18 +1,18 @@
 'use strict';
 
 var types = new Map([
-    [1, [1, readByte]],       // BYTE
-    [2, [1, readASCII]],      // ASCII
-    [3, [2, readShort]],      // SHORT
-    [4, [4, readLong]],       // LONG
-    [5, [8, readRational]],   // RATIONAL
-    [6, [1, readSByte]],      // SBYTE
-    [7, [1, readByte]],       // UNDEFINED
-    [8, [2, readSShort]],     // SSHORT
-    [9, [4, readSLong]],      // SLONG
+    [1, [1, readByte]], // BYTE
+    [2, [1, readASCII]], // ASCII
+    [3, [2, readShort]], // SHORT
+    [4, [4, readLong]], // LONG
+    [5, [8, readRational]], // RATIONAL
+    [6, [1, readSByte]], // SBYTE
+    [7, [1, readByte]], // UNDEFINED
+    [8, [2, readSShort]], // SSHORT
+    [9, [4, readSLong]], // SLONG
     [10, [8, readSRational]], // SRATIONAL
-    [11, [4, readFloat]],     // FLOAT
-    [12, [8, readDouble]]     // DOUBLE
+    [11, [4, readFloat]], // FLOAT
+    [12, [8, readDouble]] // DOUBLE
 ]);
 
 exports.getByteLength = function (type, count) {
