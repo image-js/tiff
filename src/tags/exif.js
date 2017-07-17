@@ -1,5 +1,3 @@
-'use strict';
-
 const tagsById = {
     0x829A: 'ExposureTime',
     0x829D: 'FNumber',
@@ -77,7 +75,7 @@ for (var i in tagsById) {
     tagsByName[tagsById[i]] = i;
 }
 
-module.exports = {
+export {
     tagsById,
     tagsByName
 };

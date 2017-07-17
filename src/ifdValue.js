@@ -1,5 +1,3 @@
-'use strict';
-
 var types = new Map([
     [1, [1, readByte]], // BYTE
     [2, [1, readASCII]], // ASCII
@@ -15,13 +13,13 @@ var types = new Map([
     [12, [8, readDouble]] // DOUBLE
 ]);
 
-exports.getByteLength = function (type, count) {
+export function getByteLength(type, count) {
     return types.get(type)[0] * count;
-};
+}
 
-exports.readData = function (decoder, type, count) {
+export function readData(decoder, type, count) {
     return types.get(type)[1](decoder, count);
-};
+}
 
 function readByte(decoder, count) {
     if (count === 1) return decoder.readUint8();

@@ -1,10 +1,8 @@
-'use strict';
-
-const Ifd = require('./ifd');
+import Ifd from './ifd';
 
 const dateTimeRegex = /^(\d{4}):(\d{2}):(\d{2}) (\d{2}):(\d{2}):(\d{2})$/;
 
-class TiffIfd extends Ifd {
+export default class TiffIfd extends Ifd {
     constructor() {
         super('standard');
     }
@@ -112,5 +110,3 @@ function alwaysArray(value) {
     if (typeof value === 'number') return [value];
     return value;
 }
-
-module.exports = TiffIfd;

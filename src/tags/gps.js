@@ -1,5 +1,3 @@
-'use strict';
-
 const tagsById = {
     0x0000: 'GPSVersionID',
     0x0001: 'GPSLatitudeRef',
@@ -40,7 +38,7 @@ for (var i in tagsById) {
     tagsByName[tagsById[i]] = i;
 }
 
-module.exports = {
+export {
     tagsById,
     tagsByName
 };

@@ -1,12 +1,14 @@
-'use strict';
+import * as standard from './tags/standard';
+import * as exif from './tags/exif';
+import * as gps from './tags/gps';
 
 const tags = {
-    standard: require('./tags/standard'),
-    exif: require('./tags/exif'),
-    gps: require('./tags/gps')
+    standard,
+    exif,
+    gps
 };
 
-class IFD {
+export default class IFD {
     constructor(kind) {
         if (!kind) {
             throw new Error('missing kind');
@@ -40,5 +42,3 @@ class IFD {
         return this._map;
     }
 }
-
-module.exports = IFD;

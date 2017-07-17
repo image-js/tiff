@@ -1,16 +1,14 @@
-'use strict';
-
-const IOBuffer = require('iobuffer');
-const IFD = require('./ifd');
-const TiffIFD = require('./tiffIfd');
-const IFDValue = require('./ifdValue');
+import IOBuffer from 'iobuffer';
+import IFD from './ifd';
+import TiffIFD from './tiffIfd';
+import {getByteLength, readData} from './ifdValue';
 
 const defaultOptions = {
     ignoreImageData: false,
     onlyFirst: false
 };
 
-class TIFFDecoder extends IOBuffer {
+export default class TIFFDecoder extends IOBuffer {
     constructor(data, options) {
         super(data, options);
         this._nextIFD = 0;
@@ -81,12 +79,12 @@ class TIFFDecoder extends IOBuffer {
             return;
         }
 
-        const valueByteLength = IFDValue.getByteLength(type, numValues);
+        const valueByteLength = getByteLength(type, numValues);
         if (valueByteLength > 4) {
             this.seek(this.readUint32());
         }
 
-        const value = IFDValue.readData(this, type, numValues);
+        const value = readData(this, type, numValues);
         ifd.fields.set(tag, value);
 
         // Read sub-IFDs
@@ -179,8 +177,6 @@ class TIFFDecoder extends IOBuffer {
         }
     }
 }
-
-module.exports = TIFFDecoder;
 
 function getDataArray(size, channels, bitDepth, sampleFormat) {
     if (bitDepth === 8) {

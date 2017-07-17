@@ -1,5 +1,3 @@
-'use strict';
-
 const tagsById = {
     // Baseline tags
     0x00FE: 'NewSubfileType',
@@ -182,7 +180,7 @@ for (var i in tagsById) {
     tagsByName[tagsById[i]] = i;
 }
 
-module.exports = {
+export {
     tagsById,
     tagsByName
 };
