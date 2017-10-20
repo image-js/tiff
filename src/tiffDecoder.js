@@ -14,6 +14,35 @@ export default class TIFFDecoder extends IOBuffer {
         this._nextIFD = 0;
     }
 
+    get isMultiPage() {
+        let c = 0;
+        this.decodeHeader();
+        while (this._nextIFD) {
+            c++;
+            this.decodeIFD({ignoreImageData: true});
+            if (c === 2) {
+                return true;
+            }
+        }
+        if (c === 1) {
+            return false;
+        }
+        throw unsupported('ifdCount', c);
+    }
+
+    get pageCount() {
+        let c = 0;
+        this.decodeHeader();
+        while (this._nextIFD) {
+            c++;
+            this.decodeIFD({ignoreImageData: true});
+        }
+        if (c > 0) {
+            return c;
+        }
+        throw unsupported('ifdCount', c);
+    }
+
     decode(options) {
         options = Object.assign({}, defaultOptions, options);
         const result = [];
