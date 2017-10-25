@@ -5,18 +5,18 @@ function decodeTIFF(data, options = {}) {
     return decoder.decode(options);
 }
 
-function checkMultiPage(data) {
+function isMultiPage(data) {
     const decoder = new TIFFDecoder(data);
     return decoder.isMultiPage;
 }
 
-function countPages(data) {
+function pageCount(data) {
     const decoder = new TIFFDecoder(data);
     return decoder.pageCount;
 }
 
 export {
     decodeTIFF as decode,
-    checkMultiPage,
-    countPages,
+    isMultiPage,
+    pageCount,
 };

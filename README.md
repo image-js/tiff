@@ -51,14 +51,14 @@ The `data` property is a Typed Array containing the pixel data. It is a `Uint8Ar
 * `yResolution`
 * `resolutionUnit`
 
-### tiff.countPages(data)
+### tiff.pageCount(data)
 
 Returns the number of IFDs (pages) in the file.
 
-### tiff.checkMultiPage(data)
+### tiff.isMultiPage(data)
 
 Returns true if the file has 2 or more IFDs (pages) and false if it has 1. This is slightly more
-efficient than calling `countPages()` if all you need to know is whether the file has multiple
+efficient than calling `pageCount()` if all you need to know is whether the file has multiple
 pages or not.
 
 ## License

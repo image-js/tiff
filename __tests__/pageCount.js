@@ -1,7 +1,7 @@
 import {readFileSync} from 'fs';
 import {join} from 'path';
 
-import {countPages} from '../src';
+import {pageCount} from '../src';
 
 const files = [
     {name: 'grey8.tif', pages: 1},
@@ -16,10 +16,10 @@ const files = [
 // const files = ['color8c.tif'];//'grey8.tif', 'grey16.tif', 'color8.tif', 'color16.tif'];
 const contents = files.map(file => readFileSync(join(__dirname, 'img', file.name)));
 
-describe('TIFF countPages', () =>{
-    it('should countPages', () =>{
+describe('TIFF pageCount', () =>{
+    it('should pageCount', () =>{
         for (var i = 0; i < contents.length; i++) {
-            const result = countPages(contents[i]);
+            const result = pageCount(contents[i]);
             expect(result).toBe(files[i].pages);
         }
     });
