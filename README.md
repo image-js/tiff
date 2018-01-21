@@ -26,9 +26,6 @@ The library can currently decode greyscale and RGB images (8, 16 or 32 bits). It
 
 ## API
 
-The package is in early development and API should be considered unstable.  
-I am currently only focused on extending TIFF format support and will work on the API afterwards.
-
 ### tiff.decode(data[, options])
 
 Decodes the file and returns TIFF IFDs.
