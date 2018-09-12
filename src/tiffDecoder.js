@@ -62,7 +62,7 @@ export default class TIFFDecoder extends IOBuffer {
     const value = this.readUint16();
     if (value === 0x4949) {
       this.setLittleEndian();
-    } else if (value === 0x4D4D) {
+    } else if (value === 0x4d4d) {
       this.setBigEndian();
     } else {
       throw new Error(`invalid byte order: 0x${value.toString(16)}`);
@@ -145,12 +145,21 @@ export default class TIFFDecoder extends IOBuffer {
       throw unsupported('orientation', orientation);
     }
     switch (ifd.type) {
+      case 0: // WhiteIsZero
       case 1: // BlackIsZero
       case 2: // RGB
         this.readStripData(ifd);
         break;
       default:
         throw unsupported('image type', ifd.type);
+    }
+    if (ifd.type === 0) {
+      // WhiteIsZero: we invert the values
+      const bitDepth = validateBitDepth(ifd.bitsPerSample);
+      const maxValue = Math.pow(2, bitDepth) - 1;
+      for (var i = 0; i < ifd.data.length; i++) {
+        ifd.data[i] = maxValue - ifd.data[i];
+      }
     }
   }
 
@@ -172,7 +181,11 @@ export default class TIFFDecoder extends IOBuffer {
     var remainingPixels = size;
     var pixel = 0;
     for (var i = 0; i < stripOffsets.length; i++) {
-      var stripData = new DataView(this.buffer, stripOffsets[i], stripByteCounts[i]);
+      var stripData = new DataView(
+        this.buffer,
+        stripOffsets[i],
+        stripByteCounts[i]
+      );
 
       // Last strip can be smaller
       var length = remainingPixels > maxPixels ? maxPixels : remainingPixels;
@@ -180,7 +193,14 @@ export default class TIFFDecoder extends IOBuffer {
 
       switch (compression) {
         case 1: // No compression
-          pixel = this.fillUncompressed(bitDepth, sampleFormat, data, stripData, pixel, length);
+          pixel = this.fillUncompressed(
+            bitDepth,
+            sampleFormat,
+            data,
+            stripData,
+            pixel,
+            length
+          );
           break;
         case 5: // LZW
           throw unsupported('lzw');
@@ -216,7 +236,10 @@ function getDataArray(size, channels, bitDepth, sampleFormat) {
   } else if (bitDepth === 32 && sampleFormat === 3) {
     return new Float32Array(size * channels);
   } else {
-    throw unsupported('bit depth / sample format', `${bitDepth} / ${sampleFormat}`);
+    throw unsupported(
+      'bit depth / sample format',
+      `${bitDepth} / ${sampleFormat}`
+    );
   }
 }
 
