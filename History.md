@@ -1,3 +1,13 @@
+<a name="3.0.1"></a>
+## [3.0.1](https://github.com/image-js/tiff/compare/v3.0.0...v3.0.1) (2018-09-12)
+
+
+### Bug Fixes
+
+* support WhiteIsZero ([bf7a4ca](https://github.com/image-js/tiff/commit/bf7a4ca)), closes [#14](https://github.com/image-js/tiff/issues/14)
+
+
+
 <a name="3.0.0"></a>
 # [3.0.0](https://github.com/image-js/tiff/compare/v2.1.0...v3.0.0) (2017-10-25)
 
