@@ -1,4 +1,4 @@
-import IOBuffer from 'iobuffer';
+import { IOBuffer } from 'iobuffer';
 
 import IFD from './ifd';
 import TiffIFD from './tiffIfd';
