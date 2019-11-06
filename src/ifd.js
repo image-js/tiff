@@ -5,7 +5,7 @@ import * as gps from './tags/gps';
 const tags = {
   standard,
   exif,
-  gps
+  gps,
 };
 
 export default class IFD {
@@ -33,7 +33,7 @@ export default class IFD {
     if (!this._map) {
       this._map = {};
       const taglist = tags[this.kind].tagsById;
-      for (var key of this.fields.keys()) {
+      for (let key of this.fields.keys()) {
         if (taglist[key]) {
           this._map[taglist[key]] = this.fields.get(key);
         }

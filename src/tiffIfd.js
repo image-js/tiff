@@ -1,5 +1,6 @@
 import Ifd from './ifd';
 
+// eslint-disable-next-line prefer-named-capture-group
 const dateTimeRegex = /^(\d{4}):(\d{2}):(\d{2}) (\d{2}):(\d{2}):(\d{2})$/;
 
 export default class TiffIfd extends Ifd {
@@ -21,8 +22,8 @@ export default class TiffIfd extends Ifd {
     return this.samplesPerPixel;
   }
   get date() {
-    var date = new Date();
-    var result = dateTimeRegex.exec(this.dateTime);
+    let date = new Date();
+    let result = dateTimeRegex.exec(this.dateTime);
     date.setFullYear(result[1], result[2] - 1, result[3]);
     date.setHours(result[4], result[5], result[6]);
     return date;

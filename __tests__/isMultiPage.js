@@ -14,10 +14,12 @@ const files = [
   { name: 'color16-multi.tif', pages: 2 },
 ];
 // const files = ['color8c.tif'];//'grey8.tif', 'grey16.tif', 'color8.tif', 'color16.tif'];
-const contents = files.map((file) => readFileSync(join(__dirname, 'img', file.name)));
+const contents = files.map((file) =>
+  readFileSync(join(__dirname, 'img', file.name)),
+);
 
 test('TIFF isMultiPage', () => {
-  for (var i = 0; i < contents.length; i++) {
+  for (let i = 0; i < contents.length; i++) {
     const result = isMultiPage(contents[i]);
     expect(result).toBe(files[i].pages > 1);
   }

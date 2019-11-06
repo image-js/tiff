@@ -9,12 +9,12 @@ const tagsById = {
   0x0007: 'GPSTimeStamp',
   0x0008: 'GPSSatellites',
   0x0009: 'GPSStatus',
-  0x000A: 'GPSMeasureMode',
-  0x000B: 'GPSDOP',
-  0x000C: 'GPSSpeedRef',
-  0x000D: 'GPSSpeed',
-  0x000E: 'GPSTrackRef',
-  0x000F: 'GPSTrack',
+  0x000a: 'GPSMeasureMode',
+  0x000b: 'GPSDOP',
+  0x000c: 'GPSSpeedRef',
+  0x000d: 'GPSSpeed',
+  0x000e: 'GPSTrackRef',
+  0x000f: 'GPSTrack',
   0x0010: 'GPSImgDirectionRef',
   0x0011: 'GPSImgDirection',
   0x0012: 'GPSMapDatum',
@@ -25,20 +25,17 @@ const tagsById = {
   0x0017: 'GPSDestBearingRef',
   0x0018: 'GPSDestBearing',
   0x0019: 'GPSDestDistanceRef',
-  0x001A: 'GPSDestDistance',
-  0x001B: 'GPSProcessingMethod',
-  0x001C: 'GPSAreaInformation',
-  0x001D: 'GPSDateStamp',
-  0x001E: 'GPSDifferential',
-  0x001F: 'GPSHPositioningError'
+  0x001a: 'GPSDestDistance',
+  0x001b: 'GPSProcessingMethod',
+  0x001c: 'GPSAreaInformation',
+  0x001d: 'GPSDateStamp',
+  0x001e: 'GPSDifferential',
+  0x001f: 'GPSHPositioningError',
 };
 
 const tagsByName = {};
-for (var i in tagsById) {
+for (let i in tagsById) {
   tagsByName[tagsById[i]] = i;
 }
 
-export {
-  tagsById,
-  tagsByName
-};
+export { tagsById, tagsByName };

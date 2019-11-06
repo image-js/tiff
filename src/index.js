@@ -15,8 +15,4 @@ function pageCount(data) {
   return decoder.pageCount;
 }
 
-export {
-  decodeTIFF as decode,
-  isMultiPage,
-  pageCount,
-};
+export { decodeTIFF as decode, isMultiPage, pageCount };

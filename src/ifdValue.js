@@ -1,4 +1,4 @@
-var types = new Map([
+let types = new Map([
   [1, [1, readByte]], // BYTE
   [2, [1, readASCII]], // ASCII
   [3, [2, readShort]], // SHORT
@@ -10,7 +10,7 @@ var types = new Map([
   [9, [4, readSLong]], // SLONG
   [10, [8, readSRational]], // SRATIONAL
   [11, [4, readFloat]], // FLOAT
-  [12, [8, readDouble]] // DOUBLE
+  [12, [8, readDouble]], // DOUBLE
 ]);
 
 export function getByteLength(type, count) {
@@ -23,18 +23,18 @@ export function readData(decoder, type, count) {
 
 function readByte(decoder, count) {
   if (count === 1) return decoder.readUint8();
-  var array = new Uint8Array(count);
-  for (var i = 0; i < count; i++) {
+  let array = new Uint8Array(count);
+  for (let i = 0; i < count; i++) {
     array[i] = decoder.readUint8();
   }
   return array;
 }
 
 function readASCII(decoder, count) {
-  var strings = [];
-  var currentString = '';
-  for (var i = 0; i < count; i++) {
-    var char = String.fromCharCode(decoder.readUint8());
+  let strings = [];
+  let currentString = '';
+  for (let i = 0; i < count; i++) {
+    let char = String.fromCharCode(decoder.readUint8());
     if (char === '\0') {
       strings.push(currentString);
       currentString = '';
@@ -51,8 +51,8 @@ function readASCII(decoder, count) {
 
 function readShort(decoder, count) {
   if (count === 1) return decoder.readUint16();
-  var array = new Uint16Array(count);
-  for (var i = 0; i < count; i++) {
+  let array = new Uint16Array(count);
+  for (let i = 0; i < count; i++) {
     array[i] = decoder.readUint16();
   }
   return array;
@@ -60,8 +60,8 @@ function readShort(decoder, count) {
 
 function readLong(decoder, count) {
   if (count === 1) return decoder.readUint32();
-  var array = new Uint32Array(count);
-  for (var i = 0; i < count; i++) {
+  let array = new Uint32Array(count);
+  for (let i = 0; i < count; i++) {
     array[i] = decoder.readUint32();
   }
   return array;
@@ -71,8 +71,8 @@ function readRational(decoder, count) {
   if (count === 1) {
     return decoder.readUint32() / decoder.readUint32();
   }
-  var rationals = new Array(count);
-  for (var i = 0; i < count; i++) {
+  let rationals = new Array(count);
+  for (let i = 0; i < count; i++) {
     rationals[i] = decoder.readUint32() / decoder.readUint32();
   }
   return rationals;
@@ -80,8 +80,8 @@ function readRational(decoder, count) {
 
 function readSByte(decoder, count) {
   if (count === 1) return decoder.readInt8();
-  var array = new Int8Array(count);
-  for (var i = 0; i < count; i++) {
+  let array = new Int8Array(count);
+  for (let i = 0; i < count; i++) {
     array[i] = decoder.readInt8();
   }
   return array;
@@ -89,8 +89,8 @@ function readSByte(decoder, count) {
 
 function readSShort(decoder, count) {
   if (count === 1) return decoder.readInt16();
-  var array = new Int16Array(count);
-  for (var i = 0; i < count; i++) {
+  let array = new Int16Array(count);
+  for (let i = 0; i < count; i++) {
     array[i] = decoder.readInt16();
   }
   return array;
@@ -98,8 +98,8 @@ function readSShort(decoder, count) {
 
 function readSLong(decoder, count) {
   if (count === 1) return decoder.readInt32();
-  var array = new Int32Array(count);
-  for (var i = 0; i < count; i++) {
+  let array = new Int32Array(count);
+  for (let i = 0; i < count; i++) {
     array[i] = decoder.readInt32();
   }
   return array;
@@ -109,8 +109,8 @@ function readSRational(decoder, count) {
   if (count === 1) {
     return decoder.readInt32() / decoder.readInt32();
   }
-  var rationals = new Array(count);
-  for (var i = 0; i < count; i++) {
+  let rationals = new Array(count);
+  for (let i = 0; i < count; i++) {
     rationals[i] = decoder.readInt32() / decoder.readInt32();
   }
   return rationals;
@@ -118,8 +118,8 @@ function readSRational(decoder, count) {
 
 function readFloat(decoder, count) {
   if (count === 1) return decoder.readFloat32();
-  var array = new Float32Array(count);
-  for (var i = 0; i < count; i++) {
+  let array = new Float32Array(count);
+  for (let i = 0; i < count; i++) {
     array[i] = decoder.readFloat32();
   }
   return array;
@@ -127,8 +127,8 @@ function readFloat(decoder, count) {
 
 function readDouble(decoder, count) {
   if (count === 1) return decoder.readFloat64();
-  var array = new Float64Array(count);
-  for (var i = 0; i < count; i++) {
+  let array = new Float64Array(count);
+  for (let i = 0; i < count; i++) {
     array[i] = decoder.readFloat64();
   }
   return array;

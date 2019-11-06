@@ -8,16 +8,16 @@ const files = [
   'grey16.tif',
   'color8.tif',
   'color16.tif',
-  'whiteIsZero.tif'
+  'whiteIsZero.tif',
 ];
 // const files = ['color8c.tif'];//'grey8.tif', 'grey16.tif', 'color8.tif', 'color16.tif'];
 const contents = files.map((file) =>
-  readFileSync(join(__dirname, 'img', file))
+  readFileSync(join(__dirname, 'img', file)),
 );
 
 describe('TIFF decoder', () => {
   it('should decode', () => {
-    for (var i = 0; i < contents.length; i++) {
+    for (let i = 0; i < contents.length; i++) {
       const result = decode(contents[i]);
       expect(result).toHaveLength(1);
       expect(result[0]).toHaveProperty('data');
@@ -34,12 +34,12 @@ describe('TIFF decoder', () => {
   it('should read exif data', () => {
     const result = decode(contents[0], {
       onlyFirst: true,
-      ignoreImageData: true
+      ignoreImageData: true,
     });
-    expect(result.exif.map).toEqual({
+    expect(result.exif.map).toStrictEqual({
       ColorSpace: 65535,
       PixelXDimension: 30,
-      PixelYDimension: 90
+      PixelYDimension: 90,
     });
   });
 });

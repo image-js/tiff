@@ -6,7 +6,7 @@ import { getByteLength, readData } from './ifdValue';
 
 const defaultOptions = {
   ignoreImageData: false,
-  onlyFirst: false
+  onlyFirst: false,
 };
 
 export default class TIFFDecoder extends IOBuffer {
@@ -80,7 +80,7 @@ export default class TIFFDecoder extends IOBuffer {
   decodeIFD(options) {
     this.seek(this._nextIFD);
 
-    var ifd;
+    let ifd;
     if (!options.kind) {
       ifd = new TiffIFD();
     } else {
@@ -88,7 +88,7 @@ export default class TIFFDecoder extends IOBuffer {
     }
 
     const numEntries = this.readUint16();
-    for (var i = 0; i < numEntries; i++) {
+    for (let i = 0; i < numEntries; i++) {
       this.decodeIFDEntry(ifd);
     }
     if (!options.ignoreImageData) {
@@ -129,7 +129,7 @@ export default class TIFFDecoder extends IOBuffer {
       this._nextIFD = value;
       ifd[kind] = this.decodeIFD({
         kind,
-        ignoreImageData: true
+        ignoreImageData: true,
       });
       this.offset = currentOffset;
     }
@@ -157,7 +157,7 @@ export default class TIFFDecoder extends IOBuffer {
       // WhiteIsZero: we invert the values
       const bitDepth = validateBitDepth(ifd.bitsPerSample);
       const maxValue = Math.pow(2, bitDepth) - 1;
-      for (var i = 0; i < ifd.data.length; i++) {
+      for (let i = 0; i < ifd.data.length; i++) {
         ifd.data[i] = maxValue - ifd.data[i];
       }
     }
@@ -178,17 +178,17 @@ export default class TIFFDecoder extends IOBuffer {
     const stripOffsets = ifd.stripOffsets;
     const stripByteCounts = ifd.stripByteCounts;
 
-    var remainingPixels = size;
-    var pixel = 0;
-    for (var i = 0; i < stripOffsets.length; i++) {
-      var stripData = new DataView(
+    let remainingPixels = size;
+    let pixel = 0;
+    for (let i = 0; i < stripOffsets.length; i++) {
+      let stripData = new DataView(
         this.buffer,
         stripOffsets[i],
-        stripByteCounts[i]
+        stripByteCounts[i],
       );
 
       // Last strip can be smaller
-      var length = remainingPixels > maxPixels ? maxPixels : remainingPixels;
+      let length = remainingPixels > maxPixels ? maxPixels : remainingPixels;
       remainingPixels -= length;
 
       switch (compression) {
@@ -199,7 +199,7 @@ export default class TIFFDecoder extends IOBuffer {
             data,
             stripData,
             pixel,
-            length
+            length,
           );
           break;
         case 5: // LZW
@@ -238,27 +238,27 @@ function getDataArray(size, channels, bitDepth, sampleFormat) {
   } else {
     throw unsupported(
       'bit depth / sample format',
-      `${bitDepth} / ${sampleFormat}`
+      `${bitDepth} / ${sampleFormat}`,
     );
   }
 }
 
 function fill8bit(dataTo, dataFrom, index, length) {
-  for (var i = 0; i < length; i++) {
+  for (let i = 0; i < length; i++) {
     dataTo[index++] = dataFrom.getUint8(i);
   }
   return index;
 }
 
 function fill16bit(dataTo, dataFrom, index, length, littleEndian) {
-  for (var i = 0; i < length * 2; i += 2) {
+  for (let i = 0; i < length * 2; i += 2) {
     dataTo[index++] = dataFrom.getUint16(i, littleEndian);
   }
   return index;
 }
 
 function fillFloat32(dataTo, dataFrom, index, length, littleEndian) {
-  for (var i = 0; i < length * 4; i += 4) {
+  for (let i = 0; i < length * 4; i += 4) {
     dataTo[index++] = dataFrom.getFloat32(i, littleEndian);
   }
   return index;
@@ -272,7 +272,7 @@ function validateBitDepth(bitDepth) {
   if (bitDepth.length) {
     const bitDepthArray = bitDepth;
     bitDepth = bitDepthArray[0];
-    for (var i = 0; i < bitDepthArray.length; i++) {
+    for (let i = 0; i < bitDepthArray.length; i++) {
       if (bitDepthArray[i] !== bitDepth) {
         throw unsupported('bit depth', bitDepthArray);
       }

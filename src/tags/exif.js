@@ -67,11 +67,11 @@ const tagsById = {
   0xa433: 'LensMake',
   0xa434: 'LensModel',
   0xa435: 'LensSerialNumber',
-  0xa500: 'Gamma'
+  0xa500: 'Gamma',
 };
 
 const tagsByName = {};
-for (var i in tagsById) {
+for (let i in tagsById) {
   tagsByName[tagsById[i]] = i;
 }
 
