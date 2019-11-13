@@ -3,6 +3,10 @@ import { join } from 'path';
 
 import { decode } from '../src';
 
+function readImage(file) {
+  return readFileSync(join(__dirname, 'img', file));
+}
+
 const files = [
   'grey8.tif',
   'grey16.tif',
@@ -11,9 +15,9 @@ const files = [
   'whiteIsZero.tif',
 ];
 // const files = ['color8c.tif'];//'grey8.tif', 'grey16.tif', 'color8.tif', 'color16.tif'];
-const contents = files.map((file) =>
-  readFileSync(join(__dirname, 'img', file)),
-);
+const contents = files.map(readImage);
+
+const stack = readImage('stack.tif');
 
 describe('TIFF decoder', () => {
   it('should decode', () => {
@@ -41,5 +45,13 @@ describe('TIFF decoder', () => {
       PixelXDimension: 30,
       PixelYDimension: 90,
     });
+  });
+  it('should decode stacks', () => {
+    const decoded = decode(stack);
+    expect(decoded).toHaveLength(10);
+    for (const image of decoded) {
+      expect(image.width).toBe(128);
+      expect(image.height).toBe(128);
+    }
   });
 });
