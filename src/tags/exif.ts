@@ -1,4 +1,4 @@
-const tagsById = {
+const tagsById: Record<number, string> = {
   0x829a: 'ExposureTime',
   0x829d: 'FNumber',
   0x8822: 'ExposureProgram',
@@ -70,9 +70,9 @@ const tagsById = {
   0xa500: 'Gamma',
 };
 
-const tagsByName = {};
+const tagsByName: Record<string, number> = {};
 for (let i in tagsById) {
-  tagsByName[tagsById[i]] = i;
+  tagsByName[tagsById[i]] = Number(i);
 }
 
 export { tagsById, tagsByName };

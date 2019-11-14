@@ -3,19 +3,24 @@
   "version": "3.0.1",
   "description": "TIFF image decoder written entirely in JavaScript",
   "main": "lib/index.js",
-  "module": "src/index.js",
+  "module": "lib-esm/index.js",
+  "types": "lib/index.d.ts",
   "files": [
     "lib",
+    "lib-esm",
     "src"
   ],
   "scripts": {
-    "compile": "rollup -c",
-    "eslint": "eslint __tests__ src rollup.config.js",
+    "clean": "rimraf lib lib-esm",
+    "eslint": "eslint src --ext ts",
     "eslint-fix": "npm run eslint -- --fix",
-    "prepublishOnly": "npm run compile",
+    "prepublishOnly": "npm run tsc",
     "test": "npm run test-coverage && npm run eslint",
+    "test-coverage": "jest --coverage",
     "test-only": "jest",
-    "test-coverage": "jest --coverage"
+    "tsc": "npm run clean && npm run tsc-cjs && npm run tsc-esm",
+    "tsc-cjs": "tsc --project tsconfig.cjs.json",
+    "tsc-esm": "tsc --project tsconfig.esm.json"
   },
   "repository": {
     "type": "git",
@@ -28,21 +33,34 @@
   },
   "homepage": "https://github.com/image-js/tiff#readme",
   "jest": {
+    "preset": "ts-jest",
     "testEnvironment": "node"
   },
   "dependencies": {
-    "iobuffer": "^4.0.1"
+    "iobuffer": "^5.0.2"
   },
   "devDependencies": {
-    "@babel/plugin-transform-modules-commonjs": "^7.7.0",
+    "@types/jest": "^24.0.22",
+    "@types/node": "^12.12.7",
+    "@typescript-eslint/eslint-plugin": "^2.7.0",
+    "@typescript-eslint/parser": "^2.7.0",
     "eslint": "^6.6.0",
     "eslint-config-cheminfo": "^2.0.4",
+    "eslint-config-cheminfo-typescript": "^4.1.2",
     "eslint-plugin-import": "^2.18.2",
     "eslint-plugin-jest": "^23.0.2",
     "eslint-plugin-prettier": "^3.1.1",
-    "esm": "^3.2.25",
     "jest": "^24.9.0",
     "prettier": "^1.18.2",
-    "rollup": "^1.26.3"
+    "rimraf": "^3.0.0",
+    "ts-jest": "^24.1.0",
+    "typescript": "^3.7.2"
+  },
+  "prettier": {
+    "arrowParens": "always",
+    "semi": true,
+    "singleQuote": true,
+    "tabWidth": 2,
+    "trailingComma": "all"
   }
 }

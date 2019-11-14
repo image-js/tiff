@@ -1,4 +1,4 @@
-const tagsById = {
+const tagsById: Record<number, string> = {
   0x0000: 'GPSVersionID',
   0x0001: 'GPSLatitudeRef',
   0x0002: 'GPSLatitude',
@@ -33,9 +33,9 @@ const tagsById = {
   0x001f: 'GPSHPositioningError',
 };
 
-const tagsByName = {};
+const tagsByName: Record<string, number> = {};
 for (let i in tagsById) {
-  tagsByName[tagsById[i]] = i;
+  tagsByName[tagsById[i]] = Number(i);
 }
 
 export { tagsById, tagsByName };

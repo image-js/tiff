@@ -1,4 +1,9 @@
-let types = new Map([
+import TIFFDecoder from './tiffDecoder';
+
+let types = new Map<
+  number,
+  [number, (decoder: TIFFDecoder, count: number) => any]
+>([
   [1, [1, readByte]], // BYTE
   [2, [1, readASCII]], // ASCII
   [3, [2, readShort]], // SHORT
@@ -13,15 +18,23 @@ let types = new Map([
   [12, [8, readDouble]], // DOUBLE
 ]);
 
-export function getByteLength(type, count) {
-  return types.get(type)[0] * count;
+export function getByteLength(type: number, count: number): number {
+  const val = types.get(type);
+  if (!val) throw new Error(`type not found: ${type}`);
+  return val[0] * count;
 }
 
-export function readData(decoder, type, count) {
-  return types.get(type)[1](decoder, count);
+export function readData(
+  decoder: TIFFDecoder,
+  type: number,
+  count: number,
+): any {
+  const val = types.get(type);
+  if (!val) throw new Error(`type not found: ${type}`);
+  return val[1](decoder, count);
 }
 
-function readByte(decoder, count) {
+function readByte(decoder: TIFFDecoder, count: number): number | Uint8Array {
   if (count === 1) return decoder.readUint8();
   let array = new Uint8Array(count);
   for (let i = 0; i < count; i++) {
@@ -30,7 +43,7 @@ function readByte(decoder, count) {
   return array;
 }
 
-function readASCII(decoder, count) {
+function readASCII(decoder: TIFFDecoder, count: number): string | string[] {
   let strings = [];
   let currentString = '';
   for (let i = 0; i < count; i++) {
@@ -49,7 +62,7 @@ function readASCII(decoder, count) {
   }
 }
 
-function readShort(decoder, count) {
+function readShort(decoder: TIFFDecoder, count: number): number | Uint16Array {
   if (count === 1) return decoder.readUint16();
   let array = new Uint16Array(count);
   for (let i = 0; i < count; i++) {
@@ -58,7 +71,7 @@ function readShort(decoder, count) {
   return array;
 }
 
-function readLong(decoder, count) {
+function readLong(decoder: TIFFDecoder, count: number): number | Uint32Array {
   if (count === 1) return decoder.readUint32();
   let array = new Uint32Array(count);
   for (let i = 0; i < count; i++) {
@@ -67,7 +80,7 @@ function readLong(decoder, count) {
   return array;
 }
 
-function readRational(decoder, count) {
+function readRational(decoder: TIFFDecoder, count: number): number | number[] {
   if (count === 1) {
     return decoder.readUint32() / decoder.readUint32();
   }
@@ -78,7 +91,7 @@ function readRational(decoder, count) {
   return rationals;
 }
 
-function readSByte(decoder, count) {
+function readSByte(decoder: TIFFDecoder, count: number): number | Int8Array {
   if (count === 1) return decoder.readInt8();
   let array = new Int8Array(count);
   for (let i = 0; i < count; i++) {
@@ -87,7 +100,7 @@ function readSByte(decoder, count) {
   return array;
 }
 
-function readSShort(decoder, count) {
+function readSShort(decoder: TIFFDecoder, count: number): number | Int16Array {
   if (count === 1) return decoder.readInt16();
   let array = new Int16Array(count);
   for (let i = 0; i < count; i++) {
@@ -96,7 +109,7 @@ function readSShort(decoder, count) {
   return array;
 }
 
-function readSLong(decoder, count) {
+function readSLong(decoder: TIFFDecoder, count: number): number | Int32Array {
   if (count === 1) return decoder.readInt32();
   let array = new Int32Array(count);
   for (let i = 0; i < count; i++) {
@@ -105,7 +118,7 @@ function readSLong(decoder, count) {
   return array;
 }
 
-function readSRational(decoder, count) {
+function readSRational(decoder: TIFFDecoder, count: number): number | number[] {
   if (count === 1) {
     return decoder.readInt32() / decoder.readInt32();
   }
@@ -116,7 +129,7 @@ function readSRational(decoder, count) {
   return rationals;
 }
 
-function readFloat(decoder, count) {
+function readFloat(decoder: TIFFDecoder, count: number): number | Float32Array {
   if (count === 1) return decoder.readFloat32();
   let array = new Float32Array(count);
   for (let i = 0; i < count; i++) {
@@ -125,7 +138,10 @@ function readFloat(decoder, count) {
   return array;
 }
 
-function readDouble(decoder, count) {
+function readDouble(
+  decoder: TIFFDecoder,
+  count: number,
+): number | Float64Array {
   if (count === 1) return decoder.readFloat64();
   let array = new Float64Array(count);
   for (let i = 0; i < count; i++) {

@@ -1,26 +1,33 @@
 import { IOBuffer } from 'iobuffer';
 
 import IFD from './ifd';
-import TiffIFD from './tiffIfd';
 import { getByteLength, readData } from './ifdValue';
+import { BufferType, IDecodeOptions, IFDKind, DataArray } from './types';
+import TiffIfd from './tiffIfd';
 
-const defaultOptions = {
+const defaultOptions: IDecodeOptions = {
   ignoreImageData: false,
   onlyFirst: false,
 };
 
+interface IInternalOptions extends IDecodeOptions {
+  kind?: IFDKind;
+}
+
 export default class TIFFDecoder extends IOBuffer {
-  constructor(data, options) {
-    super(data, options);
+  private _nextIFD: number;
+
+  public constructor(data: BufferType) {
+    super(data);
     this._nextIFD = 0;
   }
 
-  get isMultiPage() {
+  public get isMultiPage(): boolean {
     let c = 0;
     this.decodeHeader();
     while (this._nextIFD) {
       c++;
-      this.decodeIFD({ ignoreImageData: true });
+      this.decodeIFD({ ignoreImageData: true }, true);
       if (c === 2) {
         return true;
       }
@@ -31,12 +38,12 @@ export default class TIFFDecoder extends IOBuffer {
     throw unsupported('ifdCount', c);
   }
 
-  get pageCount() {
+  public get pageCount(): number {
     let c = 0;
     this.decodeHeader();
     while (this._nextIFD) {
       c++;
-      this.decodeIFD({ ignoreImageData: true });
+      this.decodeIFD({ ignoreImageData: true }, true);
     }
     if (c > 0) {
       return c;
@@ -44,20 +51,20 @@ export default class TIFFDecoder extends IOBuffer {
     throw unsupported('ifdCount', c);
   }
 
-  decode(options) {
+  public decode(options: IDecodeOptions = {}): TiffIfd[] {
     options = Object.assign({}, defaultOptions, options);
     const result = [];
     this.decodeHeader();
     while (this._nextIFD) {
-      result.push(this.decodeIFD(options));
+      result.push(this.decodeIFD(options, true));
       if (options.onlyFirst) {
-        return result[0];
+        return [result[0]];
       }
     }
     return result;
   }
 
-  decodeHeader() {
+  private decodeHeader(): void {
     // Byte offset
     const value = this.readUint16();
     if (value === 0x4949) {
@@ -77,13 +84,18 @@ export default class TIFFDecoder extends IOBuffer {
     this._nextIFD = this.readUint32();
   }
 
-  decodeIFD(options) {
+  private decodeIFD(options: IInternalOptions, tiff: true): TiffIfd;
+  private decodeIFD(options: IInternalOptions, tiff: false): IFD;
+  private decodeIFD(options: IInternalOptions, tiff: boolean): TiffIfd | IFD {
     this.seek(this._nextIFD);
 
-    let ifd;
-    if (!options.kind) {
-      ifd = new TiffIFD();
+    let ifd: TiffIfd | IFD;
+    if (tiff) {
+      ifd = new TiffIfd();
     } else {
+      if (!options.kind) {
+        throw new Error(`kind is missing`);
+      }
       ifd = new IFD(options.kind);
     }
 
@@ -92,13 +104,16 @@ export default class TIFFDecoder extends IOBuffer {
       this.decodeIFDEntry(ifd);
     }
     if (!options.ignoreImageData) {
+      if (!(ifd instanceof TiffIfd)) {
+        throw new Error('must be a tiff ifd');
+      }
       this.decodeImageData(ifd);
     }
     this._nextIFD = this.readUint32();
     return ifd;
   }
 
-  decodeIFDEntry(ifd) {
+  private decodeIFDEntry(ifd: IFD): void {
     const offset = this.offset;
     const tag = this.readUint16();
     const type = this.readUint16();
@@ -120,17 +135,20 @@ export default class TIFFDecoder extends IOBuffer {
     // Read sub-IFDs
     if (tag === 0x8769 || tag === 0x8825) {
       let currentOffset = this.offset;
-      let kind;
+      let kind: IFDKind = 'exif';
       if (tag === 0x8769) {
         kind = 'exif';
       } else if (tag === 0x8825) {
         kind = 'gps';
       }
       this._nextIFD = value;
-      ifd[kind] = this.decodeIFD({
-        kind,
-        ignoreImageData: true,
-      });
+      ifd[kind] = this.decodeIFD(
+        {
+          kind,
+          ignoreImageData: true,
+        },
+        false,
+      );
       this.offset = currentOffset;
     }
 
@@ -139,7 +157,7 @@ export default class TIFFDecoder extends IOBuffer {
     this.skip(12);
   }
 
-  decodeImageData(ifd) {
+  private decodeImageData(ifd: TiffIfd): void {
     const orientation = ifd.orientation;
     if (orientation && orientation !== 1) {
       throw unsupported('orientation', orientation);
@@ -163,7 +181,7 @@ export default class TIFFDecoder extends IOBuffer {
     }
   }
 
-  readStripData(ifd) {
+  private readStripData(ifd: TiffIfd): void {
     const width = ifd.width;
     const height = ifd.height;
 
@@ -203,7 +221,7 @@ export default class TIFFDecoder extends IOBuffer {
           );
           break;
         case 5: // LZW
-          throw unsupported('lzw');
+          throw unsupported('Compression', 'LZW');
         case 2: // CCITT Group 3 1-Dimensional Modified Huffman run length encoding
         case 32773: // PackBits compression
           throw unsupported('Compression', compression);
@@ -215,7 +233,14 @@ export default class TIFFDecoder extends IOBuffer {
     ifd.data = data;
   }
 
-  fillUncompressed(bitDepth, sampleFormat, data, stripData, pixel, length) {
+  private fillUncompressed(
+    bitDepth: number,
+    sampleFormat: number,
+    data: DataArray,
+    stripData: DataView,
+    pixel: number,
+    length: number,
+  ): number {
     if (bitDepth === 8) {
       return fill8bit(data, stripData, pixel, length);
     } else if (bitDepth === 16) {
@@ -228,7 +253,12 @@ export default class TIFFDecoder extends IOBuffer {
   }
 }
 
-function getDataArray(size, channels, bitDepth, sampleFormat) {
+function getDataArray(
+  size: number,
+  channels: number,
+  bitDepth: number,
+  sampleFormat: number,
+): DataArray {
   if (bitDepth === 8) {
     return new Uint8Array(size * channels);
   } else if (bitDepth === 16) {
@@ -243,33 +273,50 @@ function getDataArray(size, channels, bitDepth, sampleFormat) {
   }
 }
 
-function fill8bit(dataTo, dataFrom, index, length) {
+function fill8bit(
+  dataTo: DataArray,
+  dataFrom: DataView,
+  index: number,
+  length: number,
+): number {
   for (let i = 0; i < length; i++) {
     dataTo[index++] = dataFrom.getUint8(i);
   }
   return index;
 }
 
-function fill16bit(dataTo, dataFrom, index, length, littleEndian) {
+function fill16bit(
+  dataTo: DataArray,
+  dataFrom: DataView,
+  index: number,
+  length: number,
+  littleEndian: boolean,
+): number {
   for (let i = 0; i < length * 2; i += 2) {
     dataTo[index++] = dataFrom.getUint16(i, littleEndian);
   }
   return index;
 }
 
-function fillFloat32(dataTo, dataFrom, index, length, littleEndian) {
+function fillFloat32(
+  dataTo: DataArray,
+  dataFrom: DataView,
+  index: number,
+  length: number,
+  littleEndian: boolean,
+): number {
   for (let i = 0; i < length * 4; i += 4) {
     dataTo[index++] = dataFrom.getFloat32(i, littleEndian);
   }
   return index;
 }
 
-function unsupported(type, value) {
+function unsupported(type: string, value: any): Error {
   return new Error(`Unsupported ${type}: ${value}`);
 }
 
-function validateBitDepth(bitDepth) {
-  if (bitDepth.length) {
+function validateBitDepth(bitDepth: number[] | number): number {
+  if (typeof bitDepth !== 'number') {
     const bitDepthArray = bitDepth;
     bitDepth = bitDepthArray[0];
     for (let i = 0; i < bitDepthArray.length; i++) {

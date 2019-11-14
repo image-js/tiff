@@ -1,10 +1,10 @@
 import { readFileSync } from 'fs';
 import { join } from 'path';
 
-import { decode } from '../src';
+import { decode } from '..';
 
-function readImage(file) {
-  return readFileSync(join(__dirname, 'img', file));
+function readImage(file: string): Buffer {
+  return readFileSync(join(__dirname, '../../img', file));
 }
 
 const files = [
@@ -29,18 +29,19 @@ describe('TIFF decoder', () => {
   });
   it('should decode with onlyFirst', () => {
     const result = decode(contents[0], { onlyFirst: true });
-    expect(result).toHaveProperty('data');
+    expect(result[0]).toHaveProperty('data');
   });
   it('should omit data', () => {
     const result = decode(contents[0], { ignoreImageData: true });
-    expect(result[0].data).toBeNull();
+    expect(result[0].data).toStrictEqual(new Uint8Array());
   });
   it('should read exif data', () => {
     const result = decode(contents[0], {
       onlyFirst: true,
       ignoreImageData: true,
     });
-    expect(result.exif.map).toStrictEqual({
+    // @ts-ignore
+    expect(result[0].exif.map).toStrictEqual({
       ColorSpace: 65535,
       PixelXDimension: 30,
       PixelYDimension: 90,

@@ -1,4 +1,4 @@
-const tagsById = {
+const tagsById: Record<number, string> = {
   // Baseline tags
   0x00fe: 'NewSubfileType',
   0x00ff: 'SubfileType',
@@ -175,9 +175,9 @@ const tagsById = {
   0xc660: 'AliasLayerMetadata',
 };
 
-const tagsByName = {};
+const tagsByName: Record<string, number> = {};
 for (let i in tagsById) {
-  tagsByName[tagsById[i]] = i;
+  tagsByName[tagsById[i]] = Number(i);
 }
 
 export { tagsById, tagsByName };
