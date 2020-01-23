@@ -55,4 +55,12 @@ describe('TIFF decoder', () => {
       expect(image.height).toBe(128);
     }
   });
+
+  it('should decode palette', () => {
+    const decoded = decode(readImage('palette.tif'));
+    expect(decoded).toHaveLength(1);
+    const { palette } = decoded[0];
+    expect(palette).toHaveLength(256);
+    expect(palette[0]).toStrictEqual([65535, 0, 0]);
+  });
 });

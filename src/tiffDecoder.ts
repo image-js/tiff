@@ -166,6 +166,7 @@ export default class TIFFDecoder extends IOBuffer {
       case 0: // WhiteIsZero
       case 1: // BlackIsZero
       case 2: // RGB
+      case 3: // Palette color
         this.readStripData(ifd);
         break;
       default:

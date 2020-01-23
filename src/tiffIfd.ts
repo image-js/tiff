@@ -112,6 +112,23 @@ export default class TiffIfd extends Ifd {
   public get sMaxSampleValue(): number {
     return this.get(341) || this.maxSampleValue;
   }
+  public get palette(): [number, number, number][] | undefined {
+    const totalColors = 2 ** this.bitsPerSample;
+    const colorMap: number[] = this.get(320);
+    if (!colorMap) return undefined;
+    if (colorMap.length !== 3 * totalColors) {
+      throw new Error(`ColorMap size must be ${totalColors}`);
+    }
+    const palette: [number, number, number][] = [];
+    for (let i = 0; i < totalColors; i++) {
+      palette.push([
+        colorMap[i],
+        colorMap[i + totalColors],
+        colorMap[i + 2 * totalColors],
+      ]);
+    }
+    return palette;
+  }
 }
 
 function alwaysArray(value: number | number[]): number[] {
