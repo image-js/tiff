@@ -1,3 +1,22 @@
+# [4.0.0](https://github.com/image-js/tiff/compare/v3.0.1...v4.0.0) (2020-01-23)
+
+
+### chore
+
+* stop supporting Node.js 6 and 8 ([1156f52](https://github.com/image-js/tiff/commit/1156f52aaa4210dfb9ee2fef052b775298b86b81))
+
+
+### Features
+
+* add support for palette images ([d31413b](https://github.com/image-js/tiff/commit/d31413b09ed8f589107f7c1ffae06d5ea2e22b49))
+
+
+### BREAKING CHANGES
+
+* Node.js 6 and 8 are no longer supported.
+
+
+
 <a name="3.0.1"></a>
 ## [3.0.1](https://github.com/image-js/tiff/compare/v3.0.0...v3.0.1) (2018-09-12)
 
