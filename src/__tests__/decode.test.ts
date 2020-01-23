@@ -61,6 +61,7 @@ describe('TIFF decoder', () => {
     expect(decoded).toHaveLength(1);
     const { palette } = decoded[0];
     expect(palette).toHaveLength(256);
+    // @ts-ignore
     expect(palette[0]).toStrictEqual([65535, 0, 0]);
   });
 });
