@@ -1,7 +1,12 @@
 import { IOBuffer } from 'iobuffer';
 
+import {
+  applyHorizontalDifferencing,
+  applyHorizontalDifferencingColor,
+} from './horizontalDifferencing';
 import IFD from './ifd';
 import { getByteLength, readData } from './ifdValue';
+import { decompressLzw } from './lzw';
 import TiffIfd from './tiffIfd';
 import { BufferType, IDecodeOptions, IFDKind, DataArray } from './types';
 
@@ -172,6 +177,7 @@ export default class TIFFDecoder extends IOBuffer {
       default:
         throw unsupported('image type', ifd.type);
     }
+    this.applyPredictor(ifd);
     if (ifd.type === 0) {
       // WhiteIsZero: we invert the values
       const bitDepth = validateBitDepth(ifd.bitsPerSample);
@@ -191,7 +197,6 @@ export default class TIFFDecoder extends IOBuffer {
     const size = width * height;
     const data = getDataArray(size, 1, bitDepth, sampleFormat);
 
-    const compression = ifd.compression;
     const rowsPerStrip = ifd.rowsPerStrip;
     const maxPixels = rowsPerStrip * width;
     const stripOffsets = ifd.stripOffsets;
@@ -210,25 +215,34 @@ export default class TIFFDecoder extends IOBuffer {
       let length = remainingPixels > maxPixels ? maxPixels : remainingPixels;
       remainingPixels -= length;
 
-      switch (compression) {
-        case 1: // No compression
-          pixel = this.fillUncompressed(
-            bitDepth,
-            sampleFormat,
-            data,
-            stripData,
-            pixel,
-            length,
-          );
+      let dataToFill = stripData;
+
+      switch (ifd.compression) {
+        case 1: {
+          // No compression, nothing to do
           break;
-        case 5: // LZW
-          throw unsupported('Compression', 'LZW');
+        }
+        case 5: {
+          // LZW compression
+          dataToFill = decompressLzw(stripData);
+          break;
+        }
         case 2: // CCITT Group 3 1-Dimensional Modified Huffman run length encoding
+          throw unsupported('Compression', 'CCITT Group 3');
         case 32773: // PackBits compression
-          throw unsupported('Compression', compression);
+          throw unsupported('Compression', 'PackBits');
         default:
-          throw new Error(`invalid compression: ${compression}`);
+          throw new Error(`invalid compression: ${ifd.compression}`);
       }
+
+      pixel = this.fillUncompressed(
+        bitDepth,
+        sampleFormat,
+        data,
+        dataToFill,
+        pixel,
+        length,
+      );
     }
 
     ifd.data = data;
@@ -250,6 +264,36 @@ export default class TIFFDecoder extends IOBuffer {
       return fillFloat32(data, stripData, pixel, length, this.isLittleEndian());
     } else {
       throw unsupported('bitDepth', bitDepth);
+    }
+  }
+
+  private applyPredictor(ifd: TiffIfd): void {
+    const bitDepth = validateBitDepth(ifd.bitsPerSample);
+    switch (ifd.predictor) {
+      case 1: {
+        // No prediction scheme, nothing to do
+        break;
+      }
+      case 2: {
+        if (bitDepth === 8) {
+          if (ifd.samplesPerPixel === 1) {
+            applyHorizontalDifferencing(ifd.data as Uint8Array, ifd.width);
+          } else if (ifd.samplesPerPixel === 3) {
+            applyHorizontalDifferencingColor(ifd.data as Uint8Array, ifd.width);
+          } else {
+            throw new Error(
+              'Horizontal differencing is only supported for images with 1 or 3 samples per pixel',
+            );
+          }
+        } else {
+          throw new Error(
+            'Horizontal differencing is only supported for 8-bit images',
+          );
+        }
+        break;
+      }
+      default:
+        throw new Error(`invalid predictor: ${ifd.predictor}`);
     }
   }
 }

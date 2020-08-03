@@ -9,8 +9,11 @@ function readImage(file: string): Buffer {
 
 const files = [
   'color8.tif',
+  'color8-lzw.tif',
   'color16.tif',
+  'color16-lzw.tif',
   'grey8.tif',
+  'grey8-lzw.tif',
   'grey16.tif',
   'whiteIsZero.tif',
 ];
