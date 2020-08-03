@@ -1,7 +1,7 @@
 # tiff
 
 [![NPM version][npm-image]][npm-url]
-[![build status][travis-image]][travis-url]
+[![build status][ci-image]][ci-url]
 [![npm download][download-image]][download-url]
 
 TIFF image decoder written entirely in JavaScript.
@@ -9,7 +9,7 @@ TIFF image decoder written entirely in JavaScript.
 ## Installation
 
 ```console
-npm install tiff
+npm i tiff
 ```
 
 ## Compatibility
@@ -65,9 +65,11 @@ know is whether the file has multiple pages or not.
 
 [MIT](./LICENSE)
 
-[npm-image]: https://img.shields.io/npm/v/tiff.svg?style=flat-square
+[npm-image]: https://img.shields.io/npm/v/tiff.svg
 [npm-url]: https://www.npmjs.com/package/tiff
-[travis-image]: https://img.shields.io/travis/image-js/tiff/master.svg?style=flat-square
-[travis-url]: https://travis-ci.org/image-js/tiff
-[download-image]: https://img.shields.io/npm/dm/tiff.svg?style=flat-square
+[ci-image]: https://github.com/image-js/tiff/workflows/Node.js%20CI/badge.svg?branch=master
+[ci-url]: https://github.com/image-js/tiff/actions?query=workflow%3A%22Node.js+CI%22
+[codecov-image]: https://img.shields.io/codecov/c/github/image-js/tiff.svg
+[codecov-url]: https://codecov.io/gh/image-js/tiff
+[download-image]: https://img.shields.io/npm/dm/tiff.svg
 [download-url]: https://www.npmjs.com/package/tiff

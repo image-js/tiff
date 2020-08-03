@@ -1,6 +1,6 @@
 import TIFFDecoder from './tiffDecoder';
-import { BufferType, IDecodeOptions } from './types';
 import TiffIfd from './tiffIfd';
+import { BufferType, IDecodeOptions } from './types';
 
 function decodeTIFF(data: BufferType, options?: IDecodeOptions): TiffIfd[] {
   const decoder = new TIFFDecoder(data);

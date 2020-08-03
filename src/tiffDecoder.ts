@@ -2,8 +2,8 @@ import { IOBuffer } from 'iobuffer';
 
 import IFD from './ifd';
 import { getByteLength, readData } from './ifdValue';
-import { BufferType, IDecodeOptions, IFDKind, DataArray } from './types';
 import TiffIfd from './tiffIfd';
+import { BufferType, IDecodeOptions, IFDKind, DataArray } from './types';
 
 const defaultOptions: IDecodeOptions = {
   ignoreImageData: false,
