@@ -6,10 +6,20 @@ const EOI_CODE = 257;
 const TABLE_START = 258;
 const MIN_BIT_LENGTH = 9;
 
+const stringTable: number[][] = [];
+for (let i = 0; i < 256; i++) {
+  stringTable.push([i]);
+}
+// Fill the table with dummy data.
+// Elements at indices > 257 will be replaced during decompression.
+const dummyString = [0];
+for (let i = 256; i < 4096; i++) {
+  stringTable.push(dummyString);
+}
+
 class LzwDecoder {
   private stripArray: Uint8Array;
   private currentBit: number;
-  private stringTable: Map<number, number[]>;
   private tableLength: number;
   private currentBitLength: number;
   private outData: IOBuffer;
@@ -25,7 +35,6 @@ class LzwDecoder {
       table.set(i, [i]);
     }
     this.currentBit = 0;
-    this.stringTable = table;
     this.tableLength = TABLE_START;
     this.currentBitLength = MIN_BIT_LENGTH;
     this.outData = new IOBuffer(data.byteLength);
@@ -76,10 +85,8 @@ class LzwDecoder {
   }
 
   private stringFromCode(code: number): number[] {
-    // At this point, `code` must be in the table.
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-expect-error
-    return this.stringTable.get(code);
+    // At this point, `code` must be defined in the table.
+    return stringTable[code];
   }
 
   private isInTable(code: number): boolean {
@@ -87,7 +94,7 @@ class LzwDecoder {
   }
 
   private addStringToTable(string: number[]): void {
-    this.stringTable.set(this.tableLength++, string);
+    stringTable[this.tableLength++] = string;
     if (this.tableLength + 1 === 2 ** this.currentBitLength) {
       this.currentBitLength++;
     }
