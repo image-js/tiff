@@ -1,3 +1,12 @@
+# [4.1.0](https://github.com/image-js/tiff/compare/v4.0.0...v4.1.0) (2020-08-04)
+
+
+### Features
+
+* support LZW compression ([20fbb50](https://github.com/image-js/tiff/commit/20fbb501b8855489e91ae22f519760c2112aae68))
+
+
+
 # [4.0.0](https://github.com/image-js/tiff/compare/v3.0.1...v4.0.0) (2020-01-23)
 
 
