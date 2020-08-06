@@ -1,3 +1,12 @@
+## [4.1.2](https://github.com/image-js/tiff/compare/v4.1.1...v4.1.2) (2020-08-06)
+
+
+### Bug Fixes
+
+* really correct decoding of RGB images ([5595c53](https://github.com/image-js/tiff/commit/5595c539469dfd3e8e2b617511f8327b94c86a77))
+
+
+
 ## [4.1.1](https://github.com/image-js/tiff/compare/v4.1.0...v4.1.1) (2020-08-06)
 
 
