@@ -195,7 +195,12 @@ export default class TIFFDecoder extends IOBuffer {
     const bitDepth = validateBitDepth(ifd.bitsPerSample);
     const sampleFormat = ifd.sampleFormat;
     const size = width * height;
-    const data = getDataArray(size, 1, bitDepth, sampleFormat);
+    const data = getDataArray(
+      size,
+      ifd.samplesPerPixel,
+      bitDepth,
+      sampleFormat,
+    );
 
     const rowsPerStrip = ifd.rowsPerStrip;
     const maxPixels = rowsPerStrip * width;

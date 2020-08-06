@@ -8,6 +8,8 @@ function readImage(file: string): Buffer {
 }
 
 const files = [
+  // TODO: Unsupported LZW compression?
+  // 'color-1px.tif',
   'color8.tif',
   'color8-lzw.tif',
   'color16.tif',
@@ -24,7 +26,8 @@ const stack = readImage('stack.tif');
 test.each(cases)('should decode %s', (_, image) => {
   const result = decode(image);
   expect(result).toHaveLength(1);
-  expect(result[0]).toHaveProperty('data');
+  const { data, samplesPerPixel, width, height } = result[0];
+  expect(data).toHaveLength(width * height * samplesPerPixel);
 });
 
 test('should decode with onlyFirst', () => {
