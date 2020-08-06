@@ -194,16 +194,11 @@ export default class TIFFDecoder extends IOBuffer {
 
     const bitDepth = validateBitDepth(ifd.bitsPerSample);
     const sampleFormat = ifd.sampleFormat;
-    const size = width * height;
-    const data = getDataArray(
-      size,
-      ifd.samplesPerPixel,
-      bitDepth,
-      sampleFormat,
-    );
+    const size = width * height * ifd.samplesPerPixel;
+    const data = getDataArray(size, bitDepth, sampleFormat);
 
     const rowsPerStrip = ifd.rowsPerStrip;
-    const maxPixels = rowsPerStrip * width;
+    const maxPixels = rowsPerStrip * width * ifd.samplesPerPixel;
     const stripOffsets = ifd.stripOffsets;
     const stripByteCounts = ifd.stripByteCounts;
 
@@ -305,16 +300,15 @@ export default class TIFFDecoder extends IOBuffer {
 
 function getDataArray(
   size: number,
-  channels: number,
   bitDepth: number,
   sampleFormat: number,
 ): DataArray {
   if (bitDepth === 8) {
-    return new Uint8Array(size * channels);
+    return new Uint8Array(size);
   } else if (bitDepth === 16) {
-    return new Uint16Array(size * channels);
+    return new Uint16Array(size);
   } else if (bitDepth === 32 && sampleFormat === 3) {
-    return new Float32Array(size * channels);
+    return new Float32Array(size);
   } else {
     throw unsupported(
       'bit depth / sample format',

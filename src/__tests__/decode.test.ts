@@ -30,6 +30,24 @@ test.each(cases)('should decode %s', (_, image) => {
   expect(data).toHaveLength(width * height * samplesPerPixel);
 });
 
+test('should decode RGB', () => {
+  const [result] = decode(readImage('color-5x5.tif'));
+  expect(result.width).toBe(5);
+  expect(result.height).toBe(5);
+  expect(result.bitsPerSample).toStrictEqual(Uint16Array.from([8, 8, 8]));
+  expect(result.components).toBe(3);
+  expect(result.data).toStrictEqual(
+    // prettier-ignore
+    Uint8Array.from([
+      255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 0, 0, 0,
+      255, 0, 0, 0, 255, 0, 0, 0, 255, 128, 128, 128, 128, 128, 128,
+      255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
+      0, 255, 255, 255, 0, 255, 255, 255, 0, 128, 128, 128, 128, 128, 128,
+      0, 255, 255, 255, 0, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0,
+    ]),
+  );
+});
+
 test('should decode with onlyFirst', () => {
   const result = decode(readImage('grey8.tif'), { onlyFirst: true });
   expect(result[0]).toHaveProperty('data');
