@@ -1,3 +1,12 @@
+## [4.1.1](https://github.com/image-js/tiff/compare/v4.1.0...v4.1.1) (2020-08-06)
+
+
+### Bug Fixes
+
+* correctly support RGB images ([d546610](https://github.com/image-js/tiff/commit/d5466101845fd90c8a5225857ff0d7216d51b88d))
+
+
+
 # [4.1.0](https://github.com/image-js/tiff/compare/v4.0.0...v4.1.0) (2020-08-04)
 
 
