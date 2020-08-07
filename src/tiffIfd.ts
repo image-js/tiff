@@ -47,7 +47,11 @@ export default class TiffIfd extends Ifd {
     return this.get(257);
   }
   public get bitsPerSample(): number {
-    return this.get(258);
+    const data = this.get(258);
+    if (data && typeof data !== 'number') {
+      return data[0];
+    }
+    return data;
   }
   public get compression(): number {
     return this.get(259) || 1;
@@ -71,7 +75,7 @@ export default class TiffIfd extends Ifd {
     return this.get(274);
   }
   public get samplesPerPixel(): number {
-    return this.get(277);
+    return this.get(277) || 1;
   }
   public get rowsPerStrip(): number {
     return this.get(278);

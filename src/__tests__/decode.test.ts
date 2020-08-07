@@ -7,34 +7,95 @@ function readImage(file: string): Buffer {
   return readFileSync(join(__dirname, '../../img', file));
 }
 
-const files = [
+interface TiffFile {
+  name: string;
+  width: number;
+  height: number;
+  bitsPerSample: number;
+  components: number;
+}
+
+const files: TiffFile[] = [
   // TODO: Unsupported LZW compression?
   // 'color-1px.tif',
-  'color8.tif',
-  'color8-lzw.tif',
-  'color16.tif',
-  'color16-lzw.tif',
-  'grey8.tif',
-  'grey8-lzw.tif',
-  'grey16.tif',
-  'whiteIsZero.tif',
+  {
+    name: 'color8.tif',
+    width: 160,
+    height: 120,
+    bitsPerSample: 8,
+    components: 3,
+  },
+  {
+    name: 'color8-lzw.tif',
+    width: 160,
+    height: 120,
+    bitsPerSample: 8,
+    components: 3,
+  },
+  {
+    name: 'color16.tif',
+    width: 160,
+    height: 120,
+    bitsPerSample: 16,
+    components: 3,
+  },
+  {
+    name: 'color16-lzw.tif',
+    width: 160,
+    height: 120,
+    bitsPerSample: 16,
+    components: 3,
+  },
+  { name: 'grey8.tif', width: 30, height: 90, bitsPerSample: 8, components: 1 },
+  {
+    name: 'grey8-lzw.tif',
+    width: 30,
+    height: 90,
+    bitsPerSample: 8,
+    components: 1,
+  },
+  {
+    name: 'grey16.tif',
+    width: 30,
+    height: 90,
+    bitsPerSample: 16,
+    components: 1,
+  },
+  {
+    name: 'whiteIsZero.tif',
+    width: 1248,
+    height: 1248,
+    bitsPerSample: 16,
+    components: 1,
+  },
+  {
+    name: 'cells.tif',
+    width: 2048,
+    height: 2048,
+    bitsPerSample: 16,
+    components: 1,
+  },
 ];
-const cases = files.map((name) => [name, readImage(name)] as const);
+const cases = files.map((file) => [file, readImage(file.name)] as const);
 
 const stack = readImage('stack.tif');
 
-test.each(cases)('should decode %s', (_, image) => {
+test.each(cases)('should decode %s', (file, image) => {
   const result = decode(image);
   expect(result).toHaveLength(1);
-  const { data, samplesPerPixel, width, height } = result[0];
-  expect(data).toHaveLength(width * height * samplesPerPixel);
+  const { data, bitsPerSample, width, height, components } = result[0];
+  expect(width).toBe(file.width);
+  expect(height).toBe(file.height);
+  expect(components).toBe(file.components);
+  expect(bitsPerSample).toBe(file.bitsPerSample);
+  expect(data).toHaveLength(file.width * file.height * file.components);
 });
 
-test('should decode RGB', () => {
+test('should decode RGB 8bit', () => {
   const [result] = decode(readImage('color-5x5.tif'));
   expect(result.width).toBe(5);
   expect(result.height).toBe(5);
-  expect(result.bitsPerSample).toStrictEqual(Uint16Array.from([8, 8, 8]));
+  expect(result.bitsPerSample).toBe(8);
   expect(result.components).toBe(3);
   expect(result.data).toStrictEqual(
     // prettier-ignore

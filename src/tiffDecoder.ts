@@ -180,7 +180,7 @@ export default class TIFFDecoder extends IOBuffer {
     this.applyPredictor(ifd);
     if (ifd.type === 0) {
       // WhiteIsZero: we invert the values
-      const bitDepth = validateBitDepth(ifd.bitsPerSample);
+      const bitDepth = ifd.bitsPerSample;
       const maxValue = Math.pow(2, bitDepth) - 1;
       for (let i = 0; i < ifd.data.length; i++) {
         ifd.data[i] = maxValue - ifd.data[i];
@@ -192,7 +192,7 @@ export default class TIFFDecoder extends IOBuffer {
     const width = ifd.width;
     const height = ifd.height;
 
-    const bitDepth = validateBitDepth(ifd.bitsPerSample);
+    const bitDepth = ifd.bitsPerSample;
     const sampleFormat = ifd.sampleFormat;
     const size = width * height * ifd.samplesPerPixel;
     const data = getDataArray(size, bitDepth, sampleFormat);
@@ -268,7 +268,7 @@ export default class TIFFDecoder extends IOBuffer {
   }
 
   private applyPredictor(ifd: TiffIfd): void {
-    const bitDepth = validateBitDepth(ifd.bitsPerSample);
+    const bitDepth = ifd.bitsPerSample;
     switch (ifd.predictor) {
       case 1: {
         // No prediction scheme, nothing to do
@@ -357,17 +357,4 @@ function fillFloat32(
 
 function unsupported(type: string, value: any): Error {
   return new Error(`Unsupported ${type}: ${value}`);
-}
-
-function validateBitDepth(bitDepth: number[] | number): number {
-  if (typeof bitDepth !== 'number') {
-    const bitDepthArray = bitDepth;
-    bitDepth = bitDepthArray[0];
-    for (let i = 0; i < bitDepthArray.length; i++) {
-      if (bitDepthArray[i] !== bitDepth) {
-        throw unsupported('bit depth', bitDepthArray);
-      }
-    }
-  }
-  return bitDepth;
 }
