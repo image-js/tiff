@@ -1,3 +1,12 @@
+## [4.1.3](https://github.com/image-js/tiff/compare/v4.1.2...v4.1.3) (2020-08-07)
+
+
+### Bug Fixes
+
+* support images that do not define `samplesPerPixel` ([2c2587b](https://github.com/image-js/tiff/commit/2c2587b4307ef22225d38f5d24968c678bf6fa54))
+
+
+
 ## [4.1.2](https://github.com/image-js/tiff/compare/v4.1.1...v4.1.2) (2020-08-06)
 
 
