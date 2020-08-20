@@ -32,6 +32,14 @@ const files: TiffFile[] = [
     bitsPerSample: 8,
     components: 3,
   },
+  // TODO: implement alpha channel support.
+  // {
+  //   name: 'color8-alpha.tif',
+  //   width: 800,
+  //   height: 600,
+  //   bitsPerSample: 8,
+  //   components: 4,
+  // },
   {
     name: 'color16.tif',
     width: 160,
