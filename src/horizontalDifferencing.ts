@@ -1,29 +1,35 @@
 // Section 14: Differencing Predictor (p. 64)
 
-export function applyHorizontalDifferencing(
+export function applyHorizontalDifferencing8Bit(
   data: Uint8Array,
   width: number,
+  components: number,
 ): void {
   let i = 0;
   while (i < data.length) {
-    for (let j = 1; j < width; j++) {
-      data[i + j] = (data[i + j] + data[i + j - 1]) & 255;
+    for (let j = components; j < width * components; j += components) {
+      for (let k = 0; k < components; k++) {
+        data[i + j + k] =
+          (data[i + j + k] + data[i + j - (components - k)]) & 255;
+      }
     }
-    i += width;
+    i += width * components;
   }
 }
 
-export function applyHorizontalDifferencingColor(
-  data: Uint8Array,
+export function applyHorizontalDifferencing16Bit(
+  data: Uint16Array,
   width: number,
+  components: number,
 ): void {
   let i = 0;
   while (i < data.length) {
-    for (let j = 3; j < width * 3; j += 3) {
-      data[i + j] = (data[i + j] + data[i + j - 3]) & 255;
-      data[i + j + 1] = (data[i + j + 1] + data[i + j - 2]) & 255;
-      data[i + j + 2] = (data[i + j + 2] + data[i + j - 1]) & 255;
+    for (let j = components; j < width * components; j += components) {
+      for (let k = 0; k < components; k++) {
+        data[i + j + k] =
+          (data[i + j + k] + data[i + j - (components - k)]) & 65535;
+      }
     }
-    i += width * 3;
+    i += width * components;
   }
 }

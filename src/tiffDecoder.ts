@@ -1,8 +1,8 @@
 import { IOBuffer } from 'iobuffer';
 
 import {
-  applyHorizontalDifferencing,
-  applyHorizontalDifferencingColor,
+  applyHorizontalDifferencing8Bit,
+  applyHorizontalDifferencing16Bit,
 } from './horizontalDifferencing';
 import IFD from './ifd';
 import { getByteLength, readData } from './ifdValue';
@@ -178,6 +178,7 @@ export default class TIFFDecoder extends IOBuffer {
         throw unsupported('image type', ifd.type);
     }
     this.applyPredictor(ifd);
+    this.convertAlpha(ifd);
     if (ifd.type === 0) {
       // WhiteIsZero: we invert the values
       const bitDepth = ifd.bitsPerSample;
@@ -276,24 +277,38 @@ export default class TIFFDecoder extends IOBuffer {
       }
       case 2: {
         if (bitDepth === 8) {
-          if (ifd.samplesPerPixel === 1) {
-            applyHorizontalDifferencing(ifd.data as Uint8Array, ifd.width);
-          } else if (ifd.samplesPerPixel === 3) {
-            applyHorizontalDifferencingColor(ifd.data as Uint8Array, ifd.width);
-          } else {
-            throw new Error(
-              'Horizontal differencing is only supported for images with 1 or 3 samples per pixel',
-            );
-          }
+          applyHorizontalDifferencing8Bit(
+            ifd.data as Uint8Array,
+            ifd.width,
+            ifd.components,
+          );
+        } else if (bitDepth === 16) {
+          applyHorizontalDifferencing16Bit(
+            ifd.data as Uint16Array,
+            ifd.width,
+            ifd.components,
+          );
         } else {
           throw new Error(
-            'Horizontal differencing is only supported for 8-bit images',
+            `Horizontal differencing is only supported for images with a bit depth of ${bitDepth}`,
           );
         }
         break;
       }
       default:
         throw new Error(`invalid predictor: ${ifd.predictor}`);
+    }
+  }
+
+  private convertAlpha(ifd: TiffIfd): void {
+    if (ifd.alpha && ifd.associatedAlpha) {
+      const { data, components, maxSampleValue } = ifd;
+      for (let i = 0; i < data.length; i += components) {
+        const alphaValue = data[i + components - 1];
+        for (let j = 0; j < components - 1; j++) {
+          data[i + j] = Math.round((data[i + j] * maxSampleValue) / alphaValue);
+        }
+      }
     }
   }
 }

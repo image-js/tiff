@@ -13,6 +13,7 @@ interface TiffFile {
   height: number;
   bitsPerSample: number;
   components: number;
+  alpha?: boolean;
 }
 
 const files: TiffFile[] = [
@@ -32,14 +33,14 @@ const files: TiffFile[] = [
     bitsPerSample: 8,
     components: 3,
   },
-  // TODO: implement alpha channel support.
-  // {
-  //   name: 'color8-alpha.tif',
-  //   width: 800,
-  //   height: 600,
-  //   bitsPerSample: 8,
-  //   components: 4,
-  // },
+  {
+    name: 'color8-alpha.tif',
+    width: 800,
+    height: 600,
+    bitsPerSample: 8,
+    components: 4,
+    alpha: true,
+  },
   {
     name: 'color16.tif',
     width: 160,
@@ -83,38 +84,109 @@ const files: TiffFile[] = [
     bitsPerSample: 16,
     components: 1,
   },
+  {
+    name: 'color-5x5.tif',
+    width: 5,
+    height: 5,
+    bitsPerSample: 8,
+    components: 3,
+  },
+  {
+    name: 'color-5x5-lzw.tif',
+    width: 5,
+    height: 5,
+    bitsPerSample: 8,
+    components: 3,
+  },
+  {
+    name: 'color-alpha-2x2.tif',
+    width: 2,
+    height: 2,
+    bitsPerSample: 8,
+    components: 4,
+    alpha: true,
+  },
+  {
+    name: 'color-alpha-5x5.tif',
+    width: 5,
+    height: 5,
+    bitsPerSample: 8,
+    components: 4,
+    alpha: true,
+  },
+  {
+    name: 'color-alpha-5x5-lzw.tif',
+    width: 5,
+    height: 5,
+    bitsPerSample: 8,
+    components: 4,
+    alpha: true,
+  },
 ];
-const cases = files.map((file) => [file, readImage(file.name)] as const);
+const cases = files.map(
+  (file) => [file.name, file, readImage(file.name)] as const,
+);
 
 const stack = readImage('stack.tif');
 
-test.each(cases)('should decode %s', (file, image) => {
+test.each(cases)('should decode %s', (name, file, image) => {
   const result = decode(image);
   expect(result).toHaveLength(1);
-  const { data, bitsPerSample, width, height, components } = result[0];
+  const { data, bitsPerSample, width, height, components, alpha } = result[0];
   expect(width).toBe(file.width);
   expect(height).toBe(file.height);
   expect(components).toBe(file.components);
   expect(bitsPerSample).toBe(file.bitsPerSample);
   expect(data).toHaveLength(file.width * file.height * file.components);
+  expect(alpha).toBe(file.alpha ? true : false);
 });
 
-test('should decode RGB 8bit', () => {
+// prettier-ignore
+const expectedRgb8BitData = Uint8Array.from([
+  255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 0, 0, 0,
+  255, 0, 0, 0, 255, 0, 0, 0, 255, 128, 128, 128, 128, 128, 128,
+  255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
+  0, 255, 255, 255, 0, 255, 255, 255, 0, 128, 128, 128, 128, 128, 128,
+  0, 255, 255, 255, 0, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0,
+]);
+
+test('should decode RGB 8bit data', () => {
   const [result] = decode(readImage('color-5x5.tif'));
-  expect(result.width).toBe(5);
-  expect(result.height).toBe(5);
-  expect(result.bitsPerSample).toBe(8);
-  expect(result.components).toBe(3);
-  expect(result.data).toStrictEqual(
-    // prettier-ignore
-    Uint8Array.from([
-      255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 0, 0, 0,
-      255, 0, 0, 0, 255, 0, 0, 0, 255, 128, 128, 128, 128, 128, 128,
-      255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
-      0, 255, 255, 255, 0, 255, 255, 255, 0, 128, 128, 128, 128, 128, 128,
-      0, 255, 255, 255, 0, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0,
-    ]),
-  );
+  expect(result.data).toStrictEqual(expectedRgb8BitData);
+});
+
+test('should decode RGB 8bit data with LZW compression', () => {
+  const [result] = decode(readImage('color-5x5-lzw.tif'));
+  expect(result.data).toStrictEqual(expectedRgb8BitData);
+});
+
+// prettier-ignore
+const expectedRgb8BitAlphaData = Uint8Array.from([
+  0, 0, 0, 0, 0, 255, 0, 54, 0, 0, 255, 102, 0, 0, 0, 152, 0, 0, 0, 203,
+  255, 0, 0, 31, 0, 255, 0, 78, 0, 0, 255, 255, 128, 128, 128, 255, 128, 128, 128, 255,
+  255, 255, 255, 54, 255, 255, 255, 255, 255, 255, 255, 127, 255, 255, 255, 255, 255, 255, 255, 255,
+  0, 255, 255, 78, 255, 0, 255, 255, 255, 255, 0, 255, 128, 128, 128, 177, 128, 128, 128, 255,
+  0, 255, 255, 102, 255, 0, 255, 255, 255, 255, 0, 255, 0, 0, 0, 255, 0, 0, 0, 229
+]);
+
+test('should decode RGB 8bit data with pre-multiplied alpha', () => {
+  const [result] = decode(readImage('color-alpha-5x5.tif'));
+  expect(result.data).toStrictEqual(expectedRgb8BitAlphaData);
+});
+
+test('should decode RGB 8bit data with pre-multiplied alpha and LZW compression', () => {
+  const [result] = decode(readImage('color-alpha-5x5-lzw.tif'));
+  expect(result.data).toStrictEqual(expectedRgb8BitAlphaData);
+});
+
+test('should decode RGB 8bit data with pre-multiplied alpha and lost precision', () => {
+  // prettier-ignore
+  const expectedData = Uint8Array.from([
+    255, 0, 0, 6, 255, 0, 0, 6,
+    128, 0, 0, 6, 128, 0, 0, 6,
+  ]);
+  const [result] = decode(readImage('color-alpha-2x2.tif'));
+  expect(result.data).toStrictEqual(expectedData);
 });
 
 test('should decode with onlyFirst', () => {

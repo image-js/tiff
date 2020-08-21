@@ -38,87 +38,100 @@ export default class TiffIfd extends Ifd {
 
   // IFD fields
   public get newSubfileType(): number {
-    return this.get(254);
+    return this.get('NewSubfileType');
   }
   public get imageWidth(): number {
-    return this.get(256);
+    return this.get('ImageWidth');
   }
   public get imageLength(): number {
-    return this.get(257);
+    return this.get('ImageLength');
   }
   public get bitsPerSample(): number {
-    const data = this.get(258);
+    const data = this.get('BitsPerSample');
     if (data && typeof data !== 'number') {
       return data[0];
     }
     return data;
   }
+  public get alpha(): boolean {
+    const extraSamples = this.extraSamples;
+    if (!extraSamples) return false;
+    return extraSamples[0] !== 0;
+  }
+  public get associatedAlpha(): boolean {
+    const extraSamples = this.extraSamples;
+    if (!extraSamples) return false;
+    return extraSamples[0] === 1;
+  }
+  public get extraSamples(): number[] | undefined {
+    return alwaysArray(this.get('ExtraSamples'));
+  }
   public get compression(): number {
-    return this.get(259) || 1;
+    return this.get('Compression') || 1;
   }
   public get type(): number {
-    return this.get(262);
+    return this.get('PhotometricInterpretation');
   }
   public get fillOrder(): number {
-    return this.get(266) || 1;
+    return this.get('FillOrder') || 1;
   }
   public get documentName(): string | undefined {
-    return this.get(269);
+    return this.get('DocumentName');
   }
   public get imageDescription(): string | undefined {
-    return this.get(270);
+    return this.get('ImageDescription');
   }
   public get stripOffsets(): number[] {
-    return alwaysArray(this.get(273));
+    return alwaysArray(this.get('StripOffsets'));
   }
   public get orientation(): number {
-    return this.get(274);
+    return this.get('Orientation');
   }
   public get samplesPerPixel(): number {
-    return this.get(277) || 1;
+    return this.get('SamplesPerPixel') || 1;
   }
   public get rowsPerStrip(): number {
-    return this.get(278);
+    return this.get('RowsPerStrip');
   }
   public get stripByteCounts(): number[] {
-    return alwaysArray(this.get(279));
+    return alwaysArray(this.get('StripByteCounts'));
   }
   public get minSampleValue(): number {
-    return this.get(280) || 0;
+    return this.get('MinSampleValue') || 0;
   }
   public get maxSampleValue(): number {
-    return this.get(281) || Math.pow(2, this.bitsPerSample) - 1;
+    return this.get('MaxSampleValue') || Math.pow(2, this.bitsPerSample) - 1;
   }
   public get xResolution(): number {
-    return this.get(282);
+    return this.get('XResolution');
   }
   public get yResolution(): number {
-    return this.get(283);
+    return this.get('YResolution');
   }
   public get planarConfiguration(): number {
-    return this.get(284) || 1;
+    return this.get('PlanarConfiguration') || 1;
   }
   public get resolutionUnit(): number {
-    return this.get(296) || 2;
+    return this.get('ResolutionUnit') || 2;
   }
   public get dateTime(): string {
-    return this.get(306);
+    return this.get('DateTime');
   }
   public get predictor(): number {
-    return this.get(317) || 1;
+    return this.get('Predictor') || 1;
   }
   public get sampleFormat(): number {
-    return this.get(339) || 1;
+    return this.get('SampleFormat') || 1;
   }
   public get sMinSampleValue(): number {
-    return this.get(340) || this.minSampleValue;
+    return this.get('SMinSampleValue') || this.minSampleValue;
   }
   public get sMaxSampleValue(): number {
-    return this.get(341) || this.maxSampleValue;
+    return this.get('SMaxSampleValue') || this.maxSampleValue;
   }
   public get palette(): [number, number, number][] | undefined {
     const totalColors = 2 ** this.bitsPerSample;
-    const colorMap: number[] = this.get(320);
+    const colorMap: number[] = this.get('ColorMap');
     if (!colorMap) return undefined;
     if (colorMap.length !== 3 * totalColors) {
       throw new Error(`ColorMap size must be ${totalColors}`);

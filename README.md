@@ -23,7 +23,7 @@ recent web browsers and Node.js. You can transpile it with a tool like
 ### [TIFF standard](./TIFF6.pdf)
 
 The library can currently decode greyscale and RGB images (8, 16 or 32 bits).
-It does not support any compression algorithm yet.
+It supports LZW compression and images with an additional alpha channel.
 
 ## API
 
@@ -47,6 +47,7 @@ The `data` property is a Typed Array containing the pixel data. It is a
 - `width` - number of columns
 - `height` - number of rows
 - `bitsPerSample` - bit depth
+- `alpha` - `true` if the image has an additional alpha channel
 - `xResolution`
 - `yResolution`
 - `resolutionUnit`
