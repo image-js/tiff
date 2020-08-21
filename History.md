@@ -1,3 +1,12 @@
+# [4.2.0](https://github.com/image-js/tiff/compare/v4.1.3...v4.2.0) (2020-08-21)
+
+
+### Features
+
+* add support for alpha channel and compressed 16-bit images ([5f2e612](https://github.com/image-js/tiff/commit/5f2e6128ed7b096290c1ebe0b861a61d3849b255))
+
+
+
 ## [4.1.3](https://github.com/image-js/tiff/compare/v4.1.2...v4.1.3) (2020-08-07)
 
 
