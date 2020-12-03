@@ -14,16 +14,14 @@ npm i tiff
 
 ## Compatibility
 
-### Platform
-
-This package is written using ES2015 features. It is natively compatible with
-recent web browsers and Node.js. You can transpile it with a tool like
-[babel](https://babeljs.io/) if you need to support more JavaScript engines.
-
 ### [TIFF standard](./TIFF6.pdf)
 
 The library can currently decode greyscale and RGB images (8, 16 or 32 bits).
 It supports LZW compression and images with an additional alpha channel.
+
+### Extensions
+
+Images compressed with Zlib/deflate algorithm are also supported.
 
 ## API
 

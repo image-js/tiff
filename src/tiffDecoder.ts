@@ -9,6 +9,7 @@ import { getByteLength, readData } from './ifdValue';
 import { decompressLzw } from './lzw';
 import TiffIfd from './tiffIfd';
 import { BufferType, IDecodeOptions, IFDKind, DataArray } from './types';
+import { decompressZlib } from './zlib';
 
 const defaultOptions: IDecodeOptions = {
   ignoreImageData: false,
@@ -228,12 +229,17 @@ export default class TIFFDecoder extends IOBuffer {
           dataToFill = decompressLzw(stripData);
           break;
         }
+        case 8: {
+          // Zlib compression
+          dataToFill = decompressZlib(stripData);
+          break;
+        }
         case 2: // CCITT Group 3 1-Dimensional Modified Huffman run length encoding
           throw unsupported('Compression', 'CCITT Group 3');
         case 32773: // PackBits compression
           throw unsupported('Compression', 'PackBits');
         default:
-          throw new Error(`invalid compression: ${ifd.compression}`);
+          throw unsupported('Compression', ifd.compression);
       }
 
       pixel = this.fillUncompressed(

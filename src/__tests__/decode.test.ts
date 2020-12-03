@@ -99,6 +99,13 @@ const files: TiffFile[] = [
     components: 3,
   },
   {
+    name: 'color-5x5-deflate.tif',
+    width: 5,
+    height: 5,
+    bitsPerSample: 8,
+    components: 3,
+  },
+  {
     name: 'color-alpha-2x2.tif',
     width: 2,
     height: 2,
@@ -228,4 +235,17 @@ test('should decode palette', () => {
   expect(palette).toHaveLength(256);
   // @ts-ignore
   expect(palette[0]).toStrictEqual([65535, 0, 0]);
+});
+
+test('should decode image compressed with deflate algorithm', () => {
+  const decoded = decode(readImage('tile_rgb_deflate.tif'));
+  expect(decoded).toHaveLength(1);
+  expect(decoded[0]).toMatchObject({
+    alpha: false,
+    bitsPerSample: 16,
+    components: 3,
+    compression: 8,
+    width: 128,
+    height: 128,
+  });
 });
