@@ -1,3 +1,10 @@
+## [4.3.0](https://github.com/image-js/tiff/compare/v4.2.0...v4.3.0) (2020-12-03)
+
+
+### Features
+
+* add support for Zlib/deflate compression ([7d3a04c](https://github.com/image-js/tiff/commit/7d3a04c04c44d75373ccd6c7928cb69b3b725077))
+
 # [4.2.0](https://github.com/image-js/tiff/compare/v4.1.3...v4.2.0) (2020-08-21)
 
 
