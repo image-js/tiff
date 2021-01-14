@@ -203,6 +203,7 @@ export default class TIFFDecoder extends IOBuffer {
     const maxPixels = rowsPerStrip * width * ifd.samplesPerPixel;
     const stripOffsets = ifd.stripOffsets;
     const stripByteCounts = ifd.stripByteCounts;
+    console.log({ tile: ifd.get('TileOffsets') });
 
     let remainingPixels = size;
     let pixel = 0;
