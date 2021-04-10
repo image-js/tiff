@@ -1,15 +1,17 @@
 import { IOBuffer } from 'iobuffer';
 
+import { convertWhiteIsZero, convertYCbCr } from './colorConversion';
 import {
   applyHorizontalDifferencing8Bit,
   applyHorizontalDifferencing16Bit,
 } from './horizontalDifferencing';
 import IFD from './ifd';
 import { getByteLength, readData } from './ifdValue';
-import { decompressLzw } from './lzw';
+import { readStripData } from './readStripData';
+import { readTileData } from './readTileData';
 import TiffIfd from './tiffIfd';
-import { BufferType, IDecodeOptions, IFDKind, DataArray } from './types';
-import { decompressZlib } from './zlib';
+import { BufferType, IDecodeOptions, IFDKind } from './types';
+import { unsupported } from './utils';
 
 const defaultOptions: IDecodeOptions = {
   ignoreImageData: false,
@@ -168,109 +170,22 @@ export default class TIFFDecoder extends IOBuffer {
     if (orientation && orientation !== 1) {
       throw unsupported('orientation', orientation);
     }
-    switch (ifd.type) {
-      case 0: // WhiteIsZero
-      case 1: // BlackIsZero
-      case 2: // RGB
-      case 3: // Palette color
-        this.readStripData(ifd);
-        break;
-      default:
-        throw unsupported('image type', ifd.type);
+    checkIfdType(ifd.type);
+
+    if (ifd.hasStrips) {
+      readStripData(this, ifd);
+    } else if (ifd.hasTiles) {
+      readTileData(this, ifd);
+    } else {
+      throw new Error('cannot read TIFF without strip or tile data');
     }
+
     this.applyPredictor(ifd);
     this.convertAlpha(ifd);
     if (ifd.type === 0) {
-      // WhiteIsZero: we invert the values
-      const bitDepth = ifd.bitsPerSample;
-      const maxValue = Math.pow(2, bitDepth) - 1;
-      for (let i = 0; i < ifd.data.length; i++) {
-        ifd.data[i] = maxValue - ifd.data[i];
-      }
-    }
-  }
-
-  private readStripData(ifd: TiffIfd): void {
-    const width = ifd.width;
-    const height = ifd.height;
-
-    const bitDepth = ifd.bitsPerSample;
-    const sampleFormat = ifd.sampleFormat;
-    const size = width * height * ifd.samplesPerPixel;
-    const data = getDataArray(size, bitDepth, sampleFormat);
-
-    const rowsPerStrip = ifd.rowsPerStrip;
-    const maxPixels = rowsPerStrip * width * ifd.samplesPerPixel;
-    const stripOffsets = ifd.stripOffsets;
-    const stripByteCounts = ifd.stripByteCounts;
-
-    let remainingPixels = size;
-    let pixel = 0;
-    for (let i = 0; i < stripOffsets.length; i++) {
-      let stripData = new DataView(
-        this.buffer,
-        stripOffsets[i],
-        stripByteCounts[i],
-      );
-
-      // Last strip can be smaller
-      let length = remainingPixels > maxPixels ? maxPixels : remainingPixels;
-      remainingPixels -= length;
-
-      let dataToFill = stripData;
-
-      switch (ifd.compression) {
-        case 1: {
-          // No compression, nothing to do
-          break;
-        }
-        case 5: {
-          // LZW compression
-          dataToFill = decompressLzw(stripData);
-          break;
-        }
-        case 8: {
-          // Zlib compression
-          dataToFill = decompressZlib(stripData);
-          break;
-        }
-        case 2: // CCITT Group 3 1-Dimensional Modified Huffman run length encoding
-          throw unsupported('Compression', 'CCITT Group 3');
-        case 32773: // PackBits compression
-          throw unsupported('Compression', 'PackBits');
-        default:
-          throw unsupported('Compression', ifd.compression);
-      }
-
-      pixel = this.fillUncompressed(
-        bitDepth,
-        sampleFormat,
-        data,
-        dataToFill,
-        pixel,
-        length,
-      );
-    }
-
-    ifd.data = data;
-  }
-
-  private fillUncompressed(
-    bitDepth: number,
-    sampleFormat: number,
-    data: DataArray,
-    stripData: DataView,
-    pixel: number,
-    length: number,
-  ): number {
-    if (bitDepth === 8) {
-      return fill8bit(data, stripData, pixel, length);
-    } else if (bitDepth === 16) {
-      return fill16bit(data, stripData, pixel, length, this.isLittleEndian());
-    } else if (bitDepth === 32 && sampleFormat === 3) {
-      return fillFloat32(data, stripData, pixel, length, this.isLittleEndian());
-    } else {
-      throw unsupported('bitDepth', bitDepth);
+      convertWhiteIsZero(ifd);
+    } else if (ifd.type === 6) {
+      convertYCbCr(ifd);
     }
   }
 
@@ -319,63 +234,19 @@ export default class TIFFDecoder extends IOBuffer {
   }
 }
 
-function getDataArray(
-  size: number,
-  bitDepth: number,
-  sampleFormat: number,
-): DataArray {
-  if (bitDepth === 8) {
-    return new Uint8Array(size);
-  } else if (bitDepth === 16) {
-    return new Uint16Array(size);
-  } else if (bitDepth === 32 && sampleFormat === 3) {
-    return new Float32Array(size);
-  } else {
-    throw unsupported(
-      'bit depth / sample format',
-      `${bitDepth} / ${sampleFormat}`,
-    );
+function checkIfdType(type: number): void {
+  if (
+    // WhiteIsZero
+    type !== 0 &&
+    // BlackIsZero
+    type !== 1 &&
+    // RGB
+    type !== 2 &&
+    // Palette color
+    type !== 3 &&
+    // YCbCr (Class Y)
+    type !== 6
+  ) {
+    throw unsupported('image type', type);
   }
-}
-
-function fill8bit(
-  dataTo: DataArray,
-  dataFrom: DataView,
-  index: number,
-  length: number,
-): number {
-  for (let i = 0; i < length; i++) {
-    dataTo[index++] = dataFrom.getUint8(i);
-  }
-  return index;
-}
-
-function fill16bit(
-  dataTo: DataArray,
-  dataFrom: DataView,
-  index: number,
-  length: number,
-  littleEndian: boolean,
-): number {
-  for (let i = 0; i < length * 2; i += 2) {
-    dataTo[index++] = dataFrom.getUint16(i, littleEndian);
-  }
-  return index;
-}
-
-function fillFloat32(
-  dataTo: DataArray,
-  dataFrom: DataView,
-  index: number,
-  length: number,
-  littleEndian: boolean,
-): number {
-  for (let i = 0; i < length * 4; i += 4) {
-    dataTo[index++] = dataFrom.getFloat32(i, littleEndian);
-  }
-  return index;
-}
-
-function unsupported(type: string, value: any): Error {
-  return new Error(`Unsupported ${type}: ${value}`);
 }

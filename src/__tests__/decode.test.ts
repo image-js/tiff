@@ -34,6 +34,13 @@ const files: TiffFile[] = [
     components: 3,
   },
   {
+    name: 'color8-jpeg.tif',
+    width: 160,
+    height: 120,
+    bitsPerSample: 8,
+    components: 3,
+  },
+  {
     name: 'color8-alpha.tif',
     width: 800,
     height: 600,
@@ -128,6 +135,13 @@ const files: TiffFile[] = [
     bitsPerSample: 8,
     components: 4,
     alpha: true,
+  },
+  {
+    name: 'tiled.tif',
+    width: 1,
+    height: 1,
+    bitsPerSample: 8,
+    components: 1,
   },
 ];
 const cases = files.map(

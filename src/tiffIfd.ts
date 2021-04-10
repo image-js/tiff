@@ -35,6 +35,12 @@ export default class TiffIfd extends Ifd {
     date.setHours(Number(result[4]), Number(result[5]), Number(result[6]));
     return date;
   }
+  public get hasStrips(): boolean {
+    return this.rowsPerStrip !== undefined;
+  }
+  public get hasTiles(): boolean {
+    return this.tileLength !== undefined;
+  }
 
   // IFD fields
   public get newSubfileType(): number {
@@ -81,7 +87,7 @@ export default class TiffIfd extends Ifd {
   public get imageDescription(): string | undefined {
     return this.get('ImageDescription');
   }
-  public get stripOffsets(): number[] {
+  public get stripOffsets(): number[] | undefined {
     return alwaysArray(this.get('StripOffsets'));
   }
   public get orientation(): number {
@@ -90,10 +96,10 @@ export default class TiffIfd extends Ifd {
   public get samplesPerPixel(): number {
     return this.get('SamplesPerPixel') || 1;
   }
-  public get rowsPerStrip(): number {
+  public get rowsPerStrip(): number | undefined {
     return this.get('RowsPerStrip');
   }
-  public get stripByteCounts(): number[] {
+  public get stripByteCounts(): number[] | undefined {
     return alwaysArray(this.get('StripByteCounts'));
   }
   public get minSampleValue(): number {
@@ -145,6 +151,18 @@ export default class TiffIfd extends Ifd {
       ]);
     }
     return palette;
+  }
+  public get tileWidth(): number | undefined {
+    return this.get('TileWidth');
+  }
+  public get tileLength(): number | undefined {
+    return this.get('TileLength');
+  }
+  public get tileOffsets(): number[] | undefined {
+    return this.get('TileOffsets');
+  }
+  public get tileByteCounts(): number[] | undefined {
+    return this.get('TileByteCounts');
   }
 }
 

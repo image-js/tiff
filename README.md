@@ -31,9 +31,9 @@ npm i tiff
 The library can currently decode greyscale and RGB images (8, 16 or 32 bits).
 It supports LZW compression and images with an additional alpha channel.
 
-### Extensions
+#### [Adobe Photoshop extensions](./TIFFphotoshop.pdf)
 
-Images compressed with Zlib/deflate algorithm are also supported.
+Images compressed with the Zlib/deflate algorithm and JPEG are supported.
 
 ## API
 

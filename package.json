@@ -38,14 +38,16 @@
   },
   "dependencies": {
     "iobuffer": "^5.0.2",
+    "jpeg-js": "^0.4.3",
     "pako": "^2.0.3"
   },
   "devDependencies": {
     "@types/jest": "^26.0.20",
-    "@types/node": "^14.14.20",
+    "@types/node": "^14.14.22",
     "@types/pako": "^1.0.1",
-    "eslint": "^7.17.0",
+    "eslint": "^7.18.0",
     "eslint-config-cheminfo-typescript": "^8.0.5",
+    "image-js": "^0.31.4",
     "jest": "^26.6.3",
     "prettier": "^2.2.1",
     "rimraf": "^3.0.2",
