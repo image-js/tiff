@@ -1,5 +1,16 @@
 # Changelog
 
+## [5.0.0](https://www.github.com/image-js/tiff/compare/v4.3.0...v5.0.0) (2021-07-06)
+
+
+### ⚠ BREAKING CHANGES
+
+* Removed support for Node.js 10.
+
+### Miscellaneous Chores
+
+* stop testing on Node.js 10 ([220822f](https://www.github.com/image-js/tiff/commit/220822f008a3b8c6b047f4f78d2f01b202cda8b0))
+
 ## [4.3.0](https://github.com/image-js/tiff/compare/v4.2.0...v4.3.0) (2020-12-03)
 
 
@@ -169,6 +180,3 @@
 
 <a name="0.0.1"></a>
 ## 0.0.1 (2015-09-19)
-
-
-
