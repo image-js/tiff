@@ -129,6 +129,14 @@ const files: TiffFile[] = [
     components: 4,
     alpha: true,
   },
+  {
+    name: 'float32.tif',
+    width: 141,
+    height: 125,
+    bitsPerSample: 32,
+    components: 1,
+    alpha: false,
+  },
 ];
 const cases = files.map(
   (file) => [file.name, file, readImage(file.name)] as const,
