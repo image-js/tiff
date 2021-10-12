@@ -1,5 +1,12 @@
 # Changelog
 
+### [5.0.1](https://www.github.com/image-js/tiff/compare/v5.0.0...v5.0.1) (2021-10-12)
+
+
+### Bug Fixes
+
+* set TypeScript target to ES2020 ([#33](https://www.github.com/image-js/tiff/issues/33)) ([30e18e9](https://www.github.com/image-js/tiff/commit/30e18e956859bf64dc836ae53da3204cfefb9851))
+
 ## [5.0.0](https://www.github.com/image-js/tiff/compare/v4.3.0...v5.0.0) (2021-07-06)
 
 
