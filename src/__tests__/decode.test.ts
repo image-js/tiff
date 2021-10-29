@@ -17,8 +17,13 @@ interface TiffFile {
 }
 
 const files: TiffFile[] = [
-  // TODO: Unsupported LZW compression?
-  // 'color-1px.tif',
+  {
+    name: 'color-1px.tif',
+    width: 1,
+    height: 1,
+    bitsPerSample: 8,
+    components: 3,
+  },
   {
     name: 'color8.tif',
     width: 160,

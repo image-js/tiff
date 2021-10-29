@@ -209,7 +209,7 @@ export default class TIFFDecoder extends IOBuffer {
     for (let i = 0; i < stripOffsets.length; i++) {
       let stripData = new DataView(
         this.buffer,
-        stripOffsets[i],
+        this.byteOffset + stripOffsets[i],
         stripByteCounts[i],
       );
 
