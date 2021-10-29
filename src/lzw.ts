@@ -6,22 +6,31 @@ const EOI_CODE = 257;
 const TABLE_START = 258;
 const MIN_BIT_LENGTH = 9;
 
-const stringTable: number[][] = [];
-for (let i = 0; i < 256; i++) {
-  stringTable.push([i]);
+let stringTable: number[][] = [];
+function initializeStringTable() {
+  if (stringTable.length === 0) {
+    for (let i = 0; i < 256; i++) {
+      stringTable.push([i]);
+    }
+    // Fill the table with dummy data.
+    // Elements at indices > 257 will be replaced during decompression.
+    const dummyString: number[] = [];
+    for (let i = 256; i < 4096; i++) {
+      stringTable.push(dummyString);
+    }
+  }
 }
-// Fill the table with dummy data.
-// Elements at indices > 257 will be replaced during decompression.
-const dummyString = [0];
-for (let i = 256; i < 4096; i++) {
-  stringTable.push(dummyString);
-}
+
+const andTable = [511, 1023, 2047, 4095];
+const bitJumps = [0, 0, 0, 0, 0, 0, 0, 0, 0, 511, 1023, 2047, 4095];
 
 class LzwDecoder {
   private stripArray: Uint8Array;
-  private currentBit: number;
-  private tableLength: number;
-  private currentBitLength: number;
+  private nextData = 0;
+  private nextBits = 0;
+  private bytePointer = 0;
+  private tableLength = TABLE_START;
+  private currentBitLength = MIN_BIT_LENGTH;
   private outData: IOBuffer;
 
   public constructor(data: DataView) {
@@ -30,10 +39,8 @@ class LzwDecoder {
       data.byteOffset,
       data.byteLength,
     );
-    this.currentBit = 0;
-    this.tableLength = TABLE_START;
-    this.currentBitLength = MIN_BIT_LENGTH;
     this.outData = new IOBuffer(data.byteLength);
+    this.initializeTable();
   }
 
   public decode(): DataView {
@@ -64,6 +71,7 @@ class LzwDecoder {
       }
     }
     const outArray = this.outData.toArray();
+
     return new DataView(
       outArray.buffer,
       outArray.byteOffset,
@@ -72,6 +80,7 @@ class LzwDecoder {
   }
 
   private initializeTable(): void {
+    initializeStringTable();
     this.tableLength = TABLE_START;
     this.currentBitLength = MIN_BIT_LENGTH;
   }
@@ -92,38 +101,39 @@ class LzwDecoder {
   private addStringToTable(string: number[]): void {
     stringTable[this.tableLength++] = string;
     if (stringTable.length > 4096) {
+      stringTable = [];
       throw new Error(
         'LZW decoding error. Please open an issue at https://github.com/image-js/tiff/issues/new/choose (include a test image).',
       );
     }
-    if (this.tableLength + 1 === 2 ** this.currentBitLength) {
+    if (this.tableLength === bitJumps[this.currentBitLength]) {
       this.currentBitLength++;
     }
   }
 
   private getNextCode(): number {
-    const d = this.currentBit % 8;
-    const a = this.currentBit >>> 3;
-    const de = 8 - d;
-    const ef = this.currentBit + this.currentBitLength - (a + 1) * 8;
-    let fg = 8 * (a + 2) - (this.currentBit + this.currentBitLength);
-    const dg = (a + 2) * 8 - this.currentBit;
-    fg = Math.max(0, fg);
-    let chunk1 = this.stripArray[a] & (2 ** (8 - d) - 1);
-    chunk1 <<= this.currentBitLength - de;
-    let chunks = chunk1;
-    if (a + 1 < this.stripArray.length) {
-      let chunk2 = this.stripArray[a + 1] >>> fg;
-      chunk2 <<= Math.max(0, this.currentBitLength - dg);
-      chunks += chunk2;
+    this.nextData =
+      (this.nextData << 8) | (this.stripArray[this.bytePointer++] & 0xff);
+    this.nextBits += 8;
+
+    if (this.nextBits < this.currentBitLength) {
+      this.nextData =
+        (this.nextData << 8) | (this.stripArray[this.bytePointer++] & 0xff);
+      this.nextBits += 8;
     }
-    if (ef > 8 && a + 2 < this.stripArray.length) {
-      const hi = (a + 3) * 8 - (this.currentBit + this.currentBitLength);
-      const chunk3 = this.stripArray[a + 2] >>> hi;
-      chunks += chunk3;
+
+    const code =
+      (this.nextData >> (this.nextBits - this.currentBitLength)) &
+      andTable[this.currentBitLength - 9];
+    this.nextBits -= this.currentBitLength;
+
+    // This should not really happen but is present in other codes as well.
+    // See: https://github.com/sugark/Tiffus/blob/15a60123813d1612f4ae9e4fab964f9f7d71cf63/src/org/eclipse/swt/internal/image/TIFFLZWDecoder.java
+    if (this.bytePointer > this.stripArray.length) {
+      return 257;
     }
-    this.currentBit += this.currentBitLength;
-    return chunks;
+
+    return code;
   }
 }
 
