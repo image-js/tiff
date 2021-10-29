@@ -30,10 +30,6 @@ class LzwDecoder {
       data.byteOffset,
       data.byteLength,
     );
-    const table = new Map<number, number[]>();
-    for (let i = 0; i < 256; i++) {
-      table.set(i, [i]);
-    }
     this.currentBit = 0;
     this.tableLength = TABLE_START;
     this.currentBitLength = MIN_BIT_LENGTH;
