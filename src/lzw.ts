@@ -36,10 +36,16 @@ class LzwDecoder {
     this.outData = new IOBuffer(data.byteLength);
   }
 
-  public decode(): DataView {
+  public decode(debug = false): DataView {
     let code = 0;
     let oldCode = 0;
     while ((code = this.getNextCode()) !== EOI_CODE) {
+      if (debug) {
+        console.log(code);
+      }
+      if (code === 0 && oldCode === 0) {
+        throw new Error('debug');
+      }
       if (code === CLEAR_CODE) {
         this.initializeTable();
         code = this.getNextCode();
@@ -98,6 +104,7 @@ class LzwDecoder {
     }
     if (this.tableLength + 1 === 2 ** this.currentBitLength) {
       this.currentBitLength++;
+      console.log(`bit length is ${this.currentBitLength}`);
     }
   }
 
@@ -127,6 +134,6 @@ class LzwDecoder {
   }
 }
 
-export function decompressLzw(stripData: DataView): DataView {
-  return new LzwDecoder(stripData).decode();
+export function decompressLzw(stripData: DataView, debug = false): DataView {
+  return new LzwDecoder(stripData).decode(debug);
 }
