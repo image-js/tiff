@@ -91,6 +91,11 @@ class LzwDecoder {
 
   private addStringToTable(string: number[]): void {
     stringTable[this.tableLength++] = string;
+    if (stringTable.length > 4096) {
+      throw new Error(
+        'LZW decoding error. Please open an issue at https://github.com/image-js/tiff/issues/new/choose (include a test image).',
+      );
+    }
     if (this.tableLength + 1 === 2 ** this.currentBitLength) {
       this.currentBitLength++;
     }
