@@ -129,7 +129,13 @@ class LzwDecoder {
 
     // this should not really happen but is present in other codes as well
     // see: https://github.com/sugark/Tiffus/blob/master/src/org/eclipse/swt/internal/image/TIFFLZWDecoder.java
-    if (this.bytePointer > this.stripArray.length) return 257;
+    if (this.bytePointer > this.stripArray.length) {
+      // eslint-disable-next-line no-console
+      console.warn(
+        'There seems to be a corruption in a strip not finished by EOI_CODE',
+      );
+      return 257;
+    }
 
     return code;
   }
