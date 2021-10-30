@@ -25,7 +25,7 @@ const files: TiffFile[] = [
     components: 3,
   },
   {
-    name: 'image.tif',
+    name: 'image-lzw.tif',
     width: 2590,
     height: 3062,
     bitsPerSample: 8,
