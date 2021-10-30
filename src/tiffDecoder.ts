@@ -207,20 +207,6 @@ export default class TIFFDecoder extends IOBuffer {
     let remainingPixels = size;
     let pixel = 0;
     for (let i = 0; i < stripOffsets.length; i++) {
-      // console.log(stripOffsets[i], stripByteCounts[i], new Uint8Array());
-      if (stripOffsets[i] === 47503) {
-        console.log(
-          JSON.stringify(
-            Array.from(
-              new Uint8Array(
-                this.buffer,
-                this.byteOffset + stripOffsets[i],
-                stripByteCounts[i],
-              ),
-            ),
-          ),
-        );
-      }
       let stripData = new DataView(
         this.buffer,
         this.byteOffset + stripOffsets[i],
@@ -240,7 +226,7 @@ export default class TIFFDecoder extends IOBuffer {
         }
         case 5: {
           // LZW compression
-          dataToFill = decompressLzw(stripData, stripOffsets[i] === 47503);
+          dataToFill = decompressLzw(stripData);
           break;
         }
         case 8: {

@@ -1,11 +1,11 @@
-import { read, readFileSync } from 'fs';
+import { readFileSync } from 'fs';
 import { join } from 'path';
 
 import { decompressLzw } from '../lzw';
 
 describe('lzw', () => {
   it('1', () => {
-    const buffer = readFileSync(join(__dirname, 'data/1'));
+    const buffer = readFileSync(join(__dirname, 'data/1.strip'));
     const arrayBuffer = new Uint8Array(buffer);
     const result = decompressLzw(new DataView(arrayBuffer.buffer));
     expect(result.byteLength).toBe(7770);
@@ -18,7 +18,7 @@ describe('lzw', () => {
     ).toBe(675);
   });
   it('173', () => {
-    const buffer = readFileSync(join(__dirname, 'data/173'));
+    const buffer = readFileSync(join(__dirname, 'data/173.strip'));
     const arrayBuffer = new Uint8Array(buffer);
     const result = decompressLzw(new DataView(arrayBuffer.buffer));
     expect(result.byteLength).toBe(7770);
@@ -31,7 +31,7 @@ describe('lzw', () => {
     ).toBe(38307);
   });
   it('174', () => {
-    const buffer = readFileSync(join(__dirname, 'data/174'));
+    const buffer = readFileSync(join(__dirname, 'data/174.strip'));
     const arrayBuffer = new Uint8Array(buffer);
     const result = decompressLzw(new DataView(arrayBuffer.buffer));
     expect(result.byteLength).toBe(7770);

@@ -43,13 +43,10 @@ class LzwDecoder {
     this.bytePointer = 0;
   }
 
-  public decode(debug = false): DataView {
+  public decode(): DataView {
     let code = 0;
     let oldCode = 0;
     while ((code = this.getNextCode()) !== EOI_CODE) {
-      if (debug) {
-        console.log(code);
-      }
       if (code === CLEAR_CODE) {
         this.initializeTable();
         code = this.getNextCode();
@@ -74,6 +71,7 @@ class LzwDecoder {
       }
     }
     const outArray = this.outData.toArray();
+
     return new DataView(
       outArray.buffer,
       outArray.byteOffset,
@@ -130,10 +128,10 @@ class LzwDecoder {
     // this should not really happen but is present in other codes as well
     // see: https://github.com/sugark/Tiffus/blob/master/src/org/eclipse/swt/internal/image/TIFFLZWDecoder.java
     if (this.bytePointer > this.stripArray.length) {
-      // eslint-disable-next-line no-console
-      console.warn(
+      /**  console.warn(
         'There seems to be a corruption in a strip not finished by EOI_CODE',
       );
+      **/
       return 257;
     }
 
@@ -141,6 +139,6 @@ class LzwDecoder {
   }
 }
 
-export function decompressLzw(stripData: DataView, debug = false): DataView {
-  return new LzwDecoder(stripData).decode(debug);
+export function decompressLzw(stripData: DataView): DataView {
+  return new LzwDecoder(stripData).decode();
 }
