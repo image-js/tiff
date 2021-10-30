@@ -8,15 +8,32 @@ describe('lzw', () => {
     const buffer = readFileSync(join(__dirname, 'data/1'));
     const arrayBuffer = new Uint8Array(buffer);
     const result = decompressLzw(new DataView(arrayBuffer.buffer));
+    expect(result.byteLength).toBe(7770);
+    expect(result.buffer.byteLength).toBe(11136);
+    expect(
+      new Uint8Array(result.buffer).reduce(
+        (sum, current) => (sum += current),
+        0,
+      ),
+    ).toBe(675);
   });
   it('173', () => {
     const buffer = readFileSync(join(__dirname, 'data/173'));
     const arrayBuffer = new Uint8Array(buffer);
     const result = decompressLzw(new DataView(arrayBuffer.buffer));
+    expect(result.byteLength).toBe(7770);
+    expect(result.buffer.byteLength).toBe(11150);
+    expect(
+      new Uint8Array(result.buffer).reduce(
+        (sum, current) => (sum += current),
+        0,
+      ),
+    ).toBe(38307);
   });
-  it.only('174', () => {
+  it('174', () => {
     const buffer = readFileSync(join(__dirname, 'data/174'));
     const arrayBuffer = new Uint8Array(buffer);
     const result = decompressLzw(new DataView(arrayBuffer.buffer));
+    expect(result.byteLength).toBe(7770);
   });
 });
