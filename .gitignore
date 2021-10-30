@@ -39,3 +39,5 @@ jspm_packages
 lib
 lib-esm
 .idea/
+
+.DS_Store
