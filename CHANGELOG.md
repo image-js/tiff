@@ -1,5 +1,13 @@
 # Changelog
 
+### [5.0.2](https://www.github.com/image-js/tiff/compare/v5.0.1...v5.0.2) (2021-10-31)
+
+
+### Bug Fixes
+
+* correctly decode images from pooled buffers ([fcbbc34](https://www.github.com/image-js/tiff/commit/fcbbc348028b97ee6f99186628fe11c8135a6e6a))
+* make LZW more robust ([72a6180](https://www.github.com/image-js/tiff/commit/72a61809b8399b4d30d3657a248de2e7a2d2cdd6))
+
 ### [5.0.1](https://www.github.com/image-js/tiff/compare/v5.0.0...v5.0.1) (2021-10-12)
 
 
