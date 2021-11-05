@@ -1,5 +1,12 @@
 # Changelog
 
+### [5.0.3](https://www.github.com/image-js/tiff/compare/v5.0.2...v5.0.3) (2021-11-05)
+
+
+### Bug Fixes
+
+* support some malformed images without StripByteCounts ([56058a9](https://www.github.com/image-js/tiff/commit/56058a99c9e0b1e7e129b4150e4a705061555e20))
+
 ### [5.0.2](https://www.github.com/image-js/tiff/compare/v5.0.1...v5.0.2) (2021-10-31)
 
 
