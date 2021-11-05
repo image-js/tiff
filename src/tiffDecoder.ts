@@ -1,5 +1,6 @@
 import { IOBuffer } from 'iobuffer';
 
+import { guessStripByteCounts } from './hacks';
 import {
   applyHorizontalDifferencing8Bit,
   applyHorizontalDifferencing16Bit,
@@ -202,7 +203,7 @@ export default class TIFFDecoder extends IOBuffer {
     const rowsPerStrip = ifd.rowsPerStrip;
     const maxPixels = rowsPerStrip * width * ifd.samplesPerPixel;
     const stripOffsets = ifd.stripOffsets;
-    const stripByteCounts = ifd.stripByteCounts;
+    const stripByteCounts = ifd.stripByteCounts || guessStripByteCounts(ifd);
 
     let remainingPixels = size;
     let pixel = 0;

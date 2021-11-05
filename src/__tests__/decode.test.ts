@@ -149,6 +149,14 @@ const files: TiffFile[] = [
     components: 1,
     alpha: false,
   },
+  {
+    name: 'black.tif',
+    width: 9192,
+    height: 2690,
+    bitsPerSample: 16,
+    components: 1,
+    alpha: false,
+  },
 ];
 const cases = files.map(
   (file) => [file.name, file, readImage(file.name)] as const,
