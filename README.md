@@ -12,9 +12,9 @@ TIFF image decoder written entirely in JavaScript.
     Maintained by <a href="https://www.zakodium.com">Zakodium</a>
   </p>
 
-  [![NPM version][npm-image]][npm-url]
-  [![build status][ci-image]][ci-url]
-  [![npm download][download-image]][download-url]
+[![NPM version][npm-image]][npm-url]
+[![build status][ci-image]][ci-url]
+[![npm download][download-image]][download-url]
 
 </h3>
 
@@ -78,7 +78,7 @@ know is whether the file has multiple pages or not.
 
 [npm-image]: https://img.shields.io/npm/v/tiff.svg
 [npm-url]: https://www.npmjs.com/package/tiff
-[ci-image]: https://github.com/image-js/tiff/workflows/Node.js%20CI/badge.svg?branch=master
+[ci-image]: https://github.com/image-js/tiff/workflows/Node.js%20CI/badge.svg?branch=main
 [ci-url]: https://github.com/image-js/tiff/actions?query=workflow%3A%22Node.js+CI%22
 [codecov-image]: https://img.shields.io/codecov/c/github/image-js/tiff.svg
 [codecov-url]: https://codecov.io/gh/image-js/tiff
