@@ -2,7 +2,7 @@ import { IOBuffer } from 'iobuffer';
 
 export type BufferType = ArrayBufferLike | ArrayBufferView | IOBuffer | Buffer;
 
-export interface IDecodeOptions {
+export interface DecodeOptions {
   ignoreImageData?: boolean;
   onlyFirst?: boolean;
 }

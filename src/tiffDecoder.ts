@@ -9,15 +9,15 @@ import IFD from './ifd';
 import { getByteLength, readData } from './ifdValue';
 import { decompressLzw } from './lzw';
 import TiffIfd from './tiffIfd';
-import { BufferType, IDecodeOptions, IFDKind, DataArray } from './types';
+import { BufferType, DecodeOptions, IFDKind, DataArray } from './types';
 import { decompressZlib } from './zlib';
 
-const defaultOptions: IDecodeOptions = {
+const defaultOptions: DecodeOptions = {
   ignoreImageData: false,
   onlyFirst: false,
 };
 
-interface IInternalOptions extends IDecodeOptions {
+interface InternalOptions extends DecodeOptions {
   kind?: IFDKind;
 }
 
@@ -58,7 +58,7 @@ export default class TIFFDecoder extends IOBuffer {
     throw unsupported('ifdCount', c);
   }
 
-  public decode(options: IDecodeOptions = {}): TiffIfd[] {
+  public decode(options: DecodeOptions = {}): TiffIfd[] {
     options = Object.assign({}, defaultOptions, options);
     const result = [];
     this.decodeHeader();
@@ -91,9 +91,9 @@ export default class TIFFDecoder extends IOBuffer {
     this._nextIFD = this.readUint32();
   }
 
-  private decodeIFD(options: IInternalOptions, tiff: true): TiffIfd;
-  private decodeIFD(options: IInternalOptions, tiff: false): IFD;
-  private decodeIFD(options: IInternalOptions, tiff: boolean): TiffIfd | IFD {
+  private decodeIFD(options: InternalOptions, tiff: true): TiffIfd;
+  private decodeIFD(options: InternalOptions, tiff: false): IFD;
+  private decodeIFD(options: InternalOptions, tiff: boolean): TiffIfd | IFD {
     this.seek(this._nextIFD);
 
     let ifd: TiffIfd | IFD;
