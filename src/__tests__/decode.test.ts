@@ -225,7 +225,7 @@ test('should decode RGB 8bit data with pre-multiplied alpha and lost precision',
 });
 
 test('should decode with onlyFirst', () => {
-  const result = decode(readImage('grey8.tif'), { onlyFirst: true });
+  const result = decode(readImage('grey8.tif'), { pages: [0] });
   expect(result[0]).toHaveProperty('data');
 });
 
@@ -236,7 +236,7 @@ test('should omit data', () => {
 
 test('should read exif data', () => {
   const result = decode(readImage('grey8.tif'), {
-    onlyFirst: true,
+    pages: [0],
     ignoreImageData: true,
   });
   // @ts-ignore
@@ -254,6 +254,27 @@ test('should decode stacks', () => {
     expect(image.width).toBe(128);
     expect(image.height).toBe(128);
   }
+});
+
+test('specify pages to decode', () => {
+  const decoded = decode(stack, { pages: [0, 2, 4, 6, 8] });
+  expect(decoded).toHaveLength(5);
+  for (const image of decoded) {
+    expect(image.width).toBe(128);
+    expect(image.height).toBe(128);
+  }
+});
+
+test('should throw if pages invalid', () => {
+  expect(() => decode(stack, { pages: [-1] })).toThrow(
+    'Index -1 is invalid. Must be a positive integer.',
+  );
+  expect(() => decode(stack, { pages: [0.5] })).toThrow(
+    'Index 0.5 is invalid. Must be a positive integer.',
+  );
+  expect(() => decode(stack, { pages: [20] })).toThrow(
+    'Index 20 is out of bounds. The stack only contains 10 images.',
+  );
 });
 
 test('should decode palette', () => {
