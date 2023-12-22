@@ -265,6 +265,18 @@ test('specify pages to decode', () => {
   }
 });
 
+test('should throw if pages invalid', () => {
+  expect(() => decode(stack, { pages: [-1] })).toThrow(
+    'Index -1 is invalid. Must be a positive integer.',
+  );
+  expect(() => decode(stack, { pages: [0.5] })).toThrow(
+    'Index 0.5 is invalid. Must be a positive integer.',
+  );
+  expect(() => decode(stack, { pages: [20] })).toThrow(
+    'Index 20 is out of bounds. The stack only contains 10 images.',
+  );
+});
+
 test('should decode palette', () => {
   const decoded = decode(readImage('palette.tif'));
   expect(decoded).toHaveLength(1);

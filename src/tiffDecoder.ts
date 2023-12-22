@@ -58,25 +58,34 @@ export default class TIFFDecoder extends IOBuffer {
   }
 
   public decode(options: DecodeOptions = {}): TiffIfd[] {
-    const maxIndex = options.pages ? Math.max(...options.pages) : Infinity;
+    const { pages } = options;
+    checkPages(pages);
+
+    const maxIndex = pages ? Math.max(...pages) : Infinity;
 
     options = Object.assign({}, defaultOptions, options);
     const result = [];
     this.decodeHeader();
     let index = 0;
     while (this._nextIFD) {
-      const IFD = this.decodeIFD(options, true);
-      if (options.pages) {
-        if (options.pages.includes(index)) {
-          result.push(IFD);
+      if (pages) {
+        if (pages.includes(index)) {
+          result.push(this.decodeIFD(options, true));
+        } else {
+          this.decodeIFD({ ignoreImageData: true }, true);
         }
         if (index === maxIndex) {
           break;
         }
       } else {
-        result.push(IFD);
+        result.push(this.decodeIFD(options, true));
       }
       index++;
+    }
+    if (index < maxIndex && maxIndex !== Infinity) {
+      throw new Error(
+        `Index ${maxIndex} is out of bounds. The stack only contains ${index} images.`,
+      );
     }
     return result;
   }
@@ -389,4 +398,15 @@ function fillFloat32(
 
 function unsupported(type: string, value: any): Error {
   return new Error(`Unsupported ${type}: ${value}`);
+}
+function checkPages(pages: number[] | undefined) {
+  if (pages) {
+    for (let page of pages) {
+      if (page < 0 || Number.isInteger(page) === false) {
+        throw new RangeError(
+          `Index ${page} is invalid. Must be a positive integer.`,
+        );
+      }
+    }
+  }
 }
