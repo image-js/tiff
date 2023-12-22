@@ -4,7 +4,10 @@ export type BufferType = ArrayBufferLike | ArrayBufferView | IOBuffer | Buffer;
 
 export interface DecodeOptions {
   ignoreImageData?: boolean;
-  onlyFirst?: boolean;
+  /**
+   * Specify the indices of the pages to decode in case of a multi-page TIFF.
+   */
+  pages?: number[];
 }
 
 export type IFDKind = 'standard' | 'exif' | 'gps';

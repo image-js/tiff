@@ -14,7 +14,6 @@ import { decompressZlib } from './zlib';
 
 const defaultOptions: DecodeOptions = {
   ignoreImageData: false,
-  onlyFirst: false,
 };
 
 interface InternalOptions extends DecodeOptions {
@@ -59,14 +58,25 @@ export default class TIFFDecoder extends IOBuffer {
   }
 
   public decode(options: DecodeOptions = {}): TiffIfd[] {
+    const maxIndex = options.pages ? Math.max(...options.pages) : Infinity;
+
     options = Object.assign({}, defaultOptions, options);
     const result = [];
     this.decodeHeader();
+    let index = 0;
     while (this._nextIFD) {
-      result.push(this.decodeIFD(options, true));
-      if (options.onlyFirst) {
-        return [result[0]];
+      const IFD = this.decodeIFD(options, true);
+      if (options.pages) {
+        if (options.pages.includes(index)) {
+          result.push(IFD);
+        }
+        if (index === maxIndex) {
+          break;
+        }
+      } else {
+        result.push(IFD);
       }
+      index++;
     }
     return result;
   }
