@@ -1,6 +1,6 @@
 import TIFFDecoder from './tiffDecoder';
 
-let types = new Map<
+const types = new Map<
   number,
   [number, (decoder: TIFFDecoder, count: number) => any]
 >([
@@ -36,7 +36,7 @@ export function readData(
 
 function readByte(decoder: TIFFDecoder, count: number): number | Uint8Array {
   if (count === 1) return decoder.readUint8();
-  let array = new Uint8Array(count);
+  const array = new Uint8Array(count);
   for (let i = 0; i < count; i++) {
     array[i] = decoder.readUint8();
   }
@@ -44,10 +44,10 @@ function readByte(decoder: TIFFDecoder, count: number): number | Uint8Array {
 }
 
 function readASCII(decoder: TIFFDecoder, count: number): string | string[] {
-  let strings = [];
+  const strings = [];
   let currentString = '';
   for (let i = 0; i < count; i++) {
-    let char = String.fromCharCode(decoder.readUint8());
+    const char = String.fromCharCode(decoder.readUint8());
     if (char === '\0') {
       strings.push(currentString);
       currentString = '';
@@ -64,7 +64,7 @@ function readASCII(decoder: TIFFDecoder, count: number): string | string[] {
 
 function readShort(decoder: TIFFDecoder, count: number): number | Uint16Array {
   if (count === 1) return decoder.readUint16();
-  let array = new Uint16Array(count);
+  const array = new Uint16Array(count);
   for (let i = 0; i < count; i++) {
     array[i] = decoder.readUint16();
   }
@@ -73,7 +73,7 @@ function readShort(decoder: TIFFDecoder, count: number): number | Uint16Array {
 
 function readLong(decoder: TIFFDecoder, count: number): number | Uint32Array {
   if (count === 1) return decoder.readUint32();
-  let array = new Uint32Array(count);
+  const array = new Uint32Array(count);
   for (let i = 0; i < count; i++) {
     array[i] = decoder.readUint32();
   }
@@ -84,7 +84,7 @@ function readRational(decoder: TIFFDecoder, count: number): number | number[] {
   if (count === 1) {
     return decoder.readUint32() / decoder.readUint32();
   }
-  let rationals = new Array(count);
+  const rationals = new Array(count);
   for (let i = 0; i < count; i++) {
     rationals[i] = decoder.readUint32() / decoder.readUint32();
   }
@@ -93,7 +93,7 @@ function readRational(decoder: TIFFDecoder, count: number): number | number[] {
 
 function readSByte(decoder: TIFFDecoder, count: number): number | Int8Array {
   if (count === 1) return decoder.readInt8();
-  let array = new Int8Array(count);
+  const array = new Int8Array(count);
   for (let i = 0; i < count; i++) {
     array[i] = decoder.readInt8();
   }
@@ -102,7 +102,7 @@ function readSByte(decoder: TIFFDecoder, count: number): number | Int8Array {
 
 function readSShort(decoder: TIFFDecoder, count: number): number | Int16Array {
   if (count === 1) return decoder.readInt16();
-  let array = new Int16Array(count);
+  const array = new Int16Array(count);
   for (let i = 0; i < count; i++) {
     array[i] = decoder.readInt16();
   }
@@ -111,7 +111,7 @@ function readSShort(decoder: TIFFDecoder, count: number): number | Int16Array {
 
 function readSLong(decoder: TIFFDecoder, count: number): number | Int32Array {
   if (count === 1) return decoder.readInt32();
-  let array = new Int32Array(count);
+  const array = new Int32Array(count);
   for (let i = 0; i < count; i++) {
     array[i] = decoder.readInt32();
   }
@@ -122,7 +122,7 @@ function readSRational(decoder: TIFFDecoder, count: number): number | number[] {
   if (count === 1) {
     return decoder.readInt32() / decoder.readInt32();
   }
-  let rationals = new Array(count);
+  const rationals = new Array(count);
   for (let i = 0; i < count; i++) {
     rationals[i] = decoder.readInt32() / decoder.readInt32();
   }
@@ -131,7 +131,7 @@ function readSRational(decoder: TIFFDecoder, count: number): number | number[] {
 
 function readFloat(decoder: TIFFDecoder, count: number): number | Float32Array {
   if (count === 1) return decoder.readFloat32();
-  let array = new Float32Array(count);
+  const array = new Float32Array(count);
   for (let i = 0; i < count; i++) {
     array[i] = decoder.readFloat32();
   }
@@ -143,7 +143,7 @@ function readDouble(
   count: number,
 ): number | Float64Array {
   if (count === 1) return decoder.readFloat64();
-  let array = new Float64Array(count);
+  const array = new Float64Array(count);
   for (let i = 0; i < count; i++) {
     array[i] = decoder.readFloat64();
   }
