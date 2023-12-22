@@ -63,7 +63,7 @@ export default class TIFFDecoder extends IOBuffer {
 
     const maxIndex = pages ? Math.max(...pages) : Infinity;
 
-    options = Object.assign({}, defaultOptions, options);
+    options = { ...defaultOptions, ...options };
     const result = [];
     this.decodeHeader();
     let index = 0;
@@ -160,7 +160,7 @@ export default class TIFFDecoder extends IOBuffer {
 
     // Read sub-IFDs
     if (tag === 0x8769 || tag === 0x8825) {
-      let currentOffset = this.offset;
+      const currentOffset = this.offset;
       let kind: IFDKind = 'exif';
       if (tag === 0x8769) {
         kind = 'exif';
@@ -203,7 +203,7 @@ export default class TIFFDecoder extends IOBuffer {
     if (ifd.type === 0) {
       // WhiteIsZero: we invert the values
       const bitDepth = ifd.bitsPerSample;
-      const maxValue = Math.pow(2, bitDepth) - 1;
+      const maxValue = 2 ** bitDepth - 1;
       for (let i = 0; i < ifd.data.length; i++) {
         ifd.data[i] = maxValue - ifd.data[i];
       }
@@ -227,14 +227,14 @@ export default class TIFFDecoder extends IOBuffer {
     let remainingPixels = size;
     let pixel = 0;
     for (let i = 0; i < stripOffsets.length; i++) {
-      let stripData = new DataView(
+      const stripData = new DataView(
         this.buffer,
         this.byteOffset + stripOffsets[i],
         stripByteCounts[i],
       );
 
       // Last strip can be smaller
-      let length = remainingPixels > maxPixels ? maxPixels : remainingPixels;
+      const length = remainingPixels > maxPixels ? maxPixels : remainingPixels;
       remainingPixels -= length;
 
       let dataToFill = stripData;
@@ -401,8 +401,8 @@ function unsupported(type: string, value: any): Error {
 }
 function checkPages(pages: number[] | undefined) {
   if (pages) {
-    for (let page of pages) {
-      if (page < 0 || Number.isInteger(page) === false) {
+    for (const page of pages) {
+      if (page < 0 || !Number.isInteger(page)) {
         throw new RangeError(
           `Index ${page} is invalid. Must be a positive integer.`,
         );

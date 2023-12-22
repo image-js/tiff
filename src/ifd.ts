@@ -43,7 +43,7 @@ export default class IFD {
   public get map(): Record<string, any> {
     if (!this._hasMap) {
       const taglist = tags[this.kind].tagsById;
-      for (let key of this.fields.keys()) {
+      for (const key of this.fields.keys()) {
         if (taglist[key]) {
           this._map[taglist[key]] = this.fields.get(key);
         }

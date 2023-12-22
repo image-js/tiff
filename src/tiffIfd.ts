@@ -22,8 +22,8 @@ export default class TiffIfd extends Ifd {
     return this.samplesPerPixel;
   }
   public get date(): Date {
-    let date = new Date();
-    let result = dateTimeRegex.exec(this.dateTime);
+    const date = new Date();
+    const result = dateTimeRegex.exec(this.dateTime);
     if (result === null) {
       throw new Error(`invalid dateTime: ${this.dateTime}`);
     }
@@ -100,7 +100,7 @@ export default class TiffIfd extends Ifd {
     return this.get('MinSampleValue') || 0;
   }
   public get maxSampleValue(): number {
-    return this.get('MaxSampleValue') || Math.pow(2, this.bitsPerSample) - 1;
+    return this.get('MaxSampleValue') || 2 ** this.bitsPerSample - 1;
   }
   public get xResolution(): number {
     return this.get('XResolution');
@@ -129,14 +129,14 @@ export default class TiffIfd extends Ifd {
   public get sMaxSampleValue(): number {
     return this.get('SMaxSampleValue') || this.maxSampleValue;
   }
-  public get palette(): [number, number, number][] | undefined {
+  public get palette(): Array<[number, number, number]> | undefined {
     const totalColors = 2 ** this.bitsPerSample;
     const colorMap: number[] = this.get('ColorMap');
     if (!colorMap) return undefined;
     if (colorMap.length !== 3 * totalColors) {
       throw new Error(`ColorMap size must be ${totalColors}`);
     }
-    const palette: [number, number, number][] = [];
+    const palette: Array<[number, number, number]> = [];
     for (let i = 0; i < totalColors; i++) {
       palette.push([
         colorMap[i],

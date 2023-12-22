@@ -173,7 +173,7 @@ test.each(cases)('should decode %s', (name, file, image) => {
   expect(components).toBe(file.components);
   expect(bitsPerSample).toBe(file.bitsPerSample);
   expect(data).toHaveLength(file.width * file.height * file.components);
-  expect(alpha).toBe(file.alpha ? true : false);
+  expect(alpha).toBe(Boolean(file.alpha));
 });
 
 // prettier-ignore
@@ -239,7 +239,7 @@ test('should read exif data', () => {
     pages: [0],
     ignoreImageData: true,
   });
-  // @ts-ignore
+  // @ts-expect-error We know exif is defined.
   expect(result[0].exif.map).toStrictEqual({
     ColorSpace: 65535,
     PixelXDimension: 30,
@@ -282,7 +282,7 @@ test('should decode palette', () => {
   expect(decoded).toHaveLength(1);
   const { palette } = decoded[0];
   expect(palette).toHaveLength(256);
-  // @ts-ignore
+  // @ts-expect-error We know palette is defined.
   expect(palette[0]).toStrictEqual([65535, 0, 0]);
 });
 

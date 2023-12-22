@@ -34,7 +34,7 @@ const tagsById: Record<number, string> = {
 };
 
 const tagsByName: Record<string, number> = {};
-for (let i in tagsById) {
+for (const i in tagsById) {
   tagsByName[tagsById[i]] = Number(i);
 }
 
