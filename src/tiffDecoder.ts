@@ -83,7 +83,7 @@ export default class TIFFDecoder extends IOBuffer {
       index++;
     }
     if (index < maxIndex && maxIndex !== Infinity) {
-      throw new Error(
+      throw new RangeError(
         `Index ${maxIndex} is out of bounds. The stack only contains ${index} images.`,
       );
     }
