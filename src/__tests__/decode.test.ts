@@ -158,13 +158,13 @@ const files: TiffFile[] = [
     alpha: false,
   },
   {
-    name: "array-sample-format.tif",
+    name: 'array-sample-format.tif',
     width: 2,
     height: 2,
     bitsPerSample: 32,
     components: 3,
     alpha: false,
-  }
+  },
 ];
 const cases = files.map(
   (file) => [file.name, file, readImage(file.name)] as const,
