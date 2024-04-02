@@ -121,7 +121,11 @@ export default class TiffIfd extends Ifd {
     return this.get('Predictor') || 1;
   }
   public get sampleFormat(): number {
-    return this.get('SampleFormat') || 1;
+    const data = this.get('SampleFormat');
+    if (data && typeof data !== 'number') {
+      return data[0];
+    }
+    return data || 1;
   }
   public get sMinSampleValue(): number {
     return this.get('SMinSampleValue') || this.minSampleValue;
