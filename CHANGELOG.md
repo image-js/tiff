@@ -1,5 +1,21 @@
 # Changelog
 
+## [6.0.0](https://github.com/image-js/tiff/compare/v5.0.3...v6.0.0) (2024-04-08)
+
+
+### ⚠ BREAKING CHANGES
+
+* removed `firstImage` option, use `pages` option instead.
+
+### Features
+
+* add `pages` option ([#47](https://github.com/image-js/tiff/issues/47)) ([f0f0bac](https://github.com/image-js/tiff/commit/f0f0bac57a1f8790a9866fb4e476ac0a6e86b345)), closes [#37](https://github.com/image-js/tiff/issues/37) [#46](https://github.com/image-js/tiff/issues/46)
+
+
+### Bug Fixes
+
+* Support array sample format ([#51](https://github.com/image-js/tiff/issues/51)) ([42d778b](https://github.com/image-js/tiff/commit/42d778b333764b6e1b74b9af5718416991623fda))
+
 ### [5.0.3](https://www.github.com/image-js/tiff/compare/v5.0.2...v5.0.3) (2021-11-05)
 
 
