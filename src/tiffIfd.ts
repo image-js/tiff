@@ -121,7 +121,8 @@ export default class TiffIfd extends Ifd {
     return this.get('Predictor') || 1;
   }
   public get sampleFormat(): number {
-    return this.get('SampleFormat') || 1;
+    const data = alwaysArray(this.get('SampleFormat') || 1);
+    return data[0];
   }
   public get sMinSampleValue(): number {
     return this.get('SMinSampleValue') || this.minSampleValue;
