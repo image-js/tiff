@@ -1,3 +1,6 @@
+import { tagsById as exif } from './tags/exif';
+import { tagsById as gps } from './tags/gps';
+import { tagsById as standard } from './tags/standard';
 import TIFFDecoder from './tiffDecoder';
 import TiffIfd from './tiffIfd';
 import { BufferType, DecodeOptions } from './types';
@@ -17,4 +20,17 @@ function pageCount(data: BufferType): number {
   return decoder.pageCount;
 }
 
-export { decodeTIFF as decode, isMultiPage, pageCount, DecodeOptions, TiffIfd };
+const tagList = {
+  exif,
+  gps,
+  standard,
+};
+
+export {
+  decodeTIFF as decode,
+  isMultiPage,
+  pageCount,
+  DecodeOptions,
+  TiffIfd,
+  tagList,
+};
