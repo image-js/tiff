@@ -20,7 +20,7 @@ function pageCount(data: BufferType): number {
   return decoder.pageCount;
 }
 
-const tagList = {
+const tagNames = {
   exif,
   gps,
   standard,
@@ -32,5 +32,5 @@ export {
   pageCount,
   DecodeOptions,
   TiffIfd,
-  tagList,
+  tagNames,
 };
