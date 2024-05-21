@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.1.0](https://github.com/image-js/tiff/compare/v6.0.0...v6.1.0) (2024-05-21)
+
+
+### Features
+
+* export map of tag ids to names ([#53](https://github.com/image-js/tiff/issues/53)) ([9774e80](https://github.com/image-js/tiff/commit/9774e80c7d9d9d9db4fc05795701ec20961ad46d))
+
 ## [6.0.0](https://github.com/image-js/tiff/compare/v5.0.3...v6.0.0) (2024-04-08)
 
 
