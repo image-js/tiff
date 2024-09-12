@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.1.1](https://github.com/image-js/tiff/compare/v6.1.0...v6.1.1) (2024-09-12)
+
+
+### Bug Fixes
+
+* support Deflate compression code ([#56](https://github.com/image-js/tiff/issues/56)) ([d965602](https://github.com/image-js/tiff/commit/d965602d6f9f2857a84732298947b5fbeb75009b))
+
 ## [6.1.0](https://github.com/image-js/tiff/compare/v6.0.0...v6.1.0) (2024-05-21)
 
 
