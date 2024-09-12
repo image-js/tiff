@@ -32,6 +32,13 @@ const files: TiffFile[] = [
     components: 3,
   },
   {
+    name: 'image-deflate.tif',
+    width: 5100,
+    height: 3434,
+    bitsPerSample: 8,
+    components: 3,
+  },
+  {
     name: 'color8.tif',
     width: 160,
     height: 120,
