@@ -249,8 +249,9 @@ export default class TIFFDecoder extends IOBuffer {
           dataToFill = decompressLzw(stripData);
           break;
         }
-        case 8: {
-          // Zlib compression
+        case 8:
+        case 32946: {
+          // Zlib and Deflate compressions. They are identical.
           dataToFill = decompressZlib(stripData);
           break;
         }
