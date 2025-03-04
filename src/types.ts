@@ -12,4 +12,4 @@ export interface DecodeOptions {
 
 export type IFDKind = 'standard' | 'exif' | 'gps';
 
-export type DataArray = Uint8Array | Uint16Array | Float32Array;
+export type DataArray = Uint8Array | Uint16Array | Float32Array | Float64Array;
