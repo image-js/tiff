@@ -193,7 +193,11 @@ export default class TIFFDecoder extends IOBuffer {
       case 1: // BlackIsZero
       case 2: // RGB
       case 3: // Palette color
-        this.readStripData(ifd);
+        if(ifd.tiled){
+          this.readTileData(ifd);
+        } else {
+          this.readStripData(ifd);
+        }
         break;
       default:
         throw unsupported('image type', ifd.type);
@@ -208,6 +212,32 @@ export default class TIFFDecoder extends IOBuffer {
         ifd.data[i] = maxValue - ifd.data[i];
       }
     }
+  }
+
+  private static uncompress(data: DataView, compression: number = 1): DataView {
+
+    switch (compression) {
+      // No compression, nothing to do
+      case 1: {
+        return data;
+      }
+      // LZW compression
+      case 5: {
+        return decompressLzw(data);
+      }
+      // Zlib and Deflate compressions. They are identical.
+      case 8:
+      case 32946: {
+        return decompressZlib(data);
+      }
+      case 2: // CCITT Group 3 1-Dimensional Modified Huffman run length encoding
+        throw unsupported('Compression', 'CCITT Group 3');
+      case 32773: // PackBits compression
+        throw unsupported('Compression', 'PackBits');
+      default:
+        throw unsupported('Compression', compression);
+    }
+
   }
 
   private readStripData(ifd: TiffIfd): void {
@@ -237,32 +267,7 @@ export default class TIFFDecoder extends IOBuffer {
       const length = remainingPixels > maxPixels ? maxPixels : remainingPixels;
       remainingPixels -= length;
 
-      let dataToFill = stripData;
-
-      switch (ifd.compression) {
-        case 1: {
-          // No compression, nothing to do
-          break;
-        }
-        case 5: {
-          // LZW compression
-          dataToFill = decompressLzw(stripData);
-          break;
-        }
-        case 8:
-        case 32946: {
-          // Zlib and Deflate compressions. They are identical.
-          dataToFill = decompressZlib(stripData);
-          break;
-        }
-        case 2: // CCITT Group 3 1-Dimensional Modified Huffman run length encoding
-          throw unsupported('Compression', 'CCITT Group 3');
-        case 32773: // PackBits compression
-          throw unsupported('Compression', 'PackBits');
-        default:
-          throw unsupported('Compression', ifd.compression);
-      }
-
+      const dataToFill = TIFFDecoder.uncompress(stripData, ifd.compression)
       pixel = this.fillUncompressed(
         bitDepth,
         sampleFormat,
@@ -271,6 +276,69 @@ export default class TIFFDecoder extends IOBuffer {
         pixel,
         length,
       );
+    }
+
+    ifd.data = data;
+  }
+
+  private readTileData(ifd: TiffIfd): void {
+
+    if(!ifd.tileWidth || !ifd.tileHeight)
+      return;
+
+    const width = ifd.width;
+    const height = ifd.height;
+    const size = width * height * ifd.samplesPerPixel;
+
+    // Tile Dimensions
+    const twidth = ifd.tileWidth;
+    const theight = ifd.tileHeight;
+    const tileByteCounts = ifd.tileByteCounts;
+    const tileOffsets = ifd.tileOffsets;
+
+    // Tile Counts
+    const nwidth = Math.floor((width + twidth - 1) / twidth);
+    const nheight = Math.floor((height + theight - 1) / theight);
+
+    const bitDepth = ifd.bitsPerSample;
+    const sampleFormat = ifd.sampleFormat;
+
+    // Result Data
+    
+    const data = getDataArray(size, bitDepth, sampleFormat);
+    const endian = this.isLittleEndian();
+
+    for(let nx = 0; nx < nwidth; ++nx){
+      for(let ny = 0; ny < nheight; ++ny){
+
+        const nind = nx * nheight + ny;
+      
+        // Tile Decompress Data
+        const tileData = new DataView(
+          this.buffer,
+          tileOffsets[nind],
+          tileByteCounts[nind],
+        );
+        const uncompressed = TIFFDecoder.uncompress(tileData, ifd.compression)
+
+        // Copy Data into Tile
+        for(let ix = 0; ix < twidth; ++ix){
+          for(let iy = 0; iy < theight; ++iy){
+
+            const tposx = ix;
+            const tposy = iy;
+            const fposx = nx * twidth + tposx;
+            const fposy = ny * theight + tposy;
+            if(fposx >= width) continue;
+            if(fposy >= height) continue;
+
+            const ind_out = ((width - 1 - fposx) * height + fposy);
+            const ind_in = (tposx * theight + tposy);
+            data[ind_out] = uncompressed.getFloat32(4*ind_in, endian);
+
+          }
+        }
+      }
     }
 
     ifd.data = data;
