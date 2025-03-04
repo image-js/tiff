@@ -241,44 +241,75 @@ export default class TIFFDecoder extends IOBuffer {
   }
 
   private readStripData(ifd: TiffIfd): void {
+
     const width = ifd.width;
     const height = ifd.height;
-
-    const bitDepth = ifd.bitsPerSample;
-    const sampleFormat = ifd.sampleFormat;
     const size = width * height * ifd.samplesPerPixel;
-    const data = getDataArray(size, bitDepth, sampleFormat);
 
-    const rowsPerStrip = ifd.rowsPerStrip;
-    const maxPixels = rowsPerStrip * width * ifd.samplesPerPixel;
+    // Note: Strips are Column-Major
     const stripOffsets = ifd.stripOffsets;
     const stripByteCounts = ifd.stripByteCounts || guessStripByteCounts(ifd);
+    const stripLength = width * ifd.rowsPerStrip * ifd.samplesPerPixel; 
 
-    let remainingPixels = size;
-    let pixel = 0;
+    // Output Data Buffer
+    const output = getDataArray(size, ifd.bitsPerSample, ifd.sampleFormat);
+
+    // Iterate over Number of Strips
+    let start = 0;
     for (let i = 0; i < stripOffsets.length; i++) {
+
+      // Extract Strip Data, Uncompress
       const stripData = new DataView(
         this.buffer,
         this.byteOffset + stripOffsets[i],
         stripByteCounts[i],
       );
+      const uncompressed = TIFFDecoder.uncompress(stripData, ifd.compression)
 
       // Last strip can be smaller
-      const length = remainingPixels > maxPixels ? maxPixels : remainingPixels;
-      remainingPixels -= length;
+      const length = Math.min(stripLength, size - start);
 
-      const dataToFill = TIFFDecoder.uncompress(stripData, ifd.compression)
-      pixel = this.fillUncompressed(
-        bitDepth,
-        sampleFormat,
-        data,
-        dataToFill,
-        pixel,
-        length,
+      // Write Uncompressed Strip Data to Output
+      this.fillLinear(
+        ifd.bitsPerSample,
+        ifd.sampleFormat,
+        output,
+        uncompressed,
+        start,
+        length
       );
+
+      start += length;
+
     }
 
-    ifd.data = data;
+    ifd.data = output;
+  }
+
+  private fillLinear (
+    bitDepth: number,
+    sampleFormat: number,
+    output: DataArray,
+    input: DataView,
+    start: number,
+    length: number,
+  ){
+    const littleEndian = this.isLittleEndian();
+    if (bitDepth === 8) {
+      for (let i = 0; i < length; ++i) {
+        output[start + i] = input.getUint8(i);
+      }
+    } else if (bitDepth === 16) {
+      for (let i = 0; i < length; ++i) {
+        output[start + i] = input.getUint16(2*i, littleEndian);
+      }
+    } else if (bitDepth === 32 && sampleFormat === 3) {
+      for (let i = 0; i < length; ++i) {
+        output[start + i] = input.getFloat32(4*i, littleEndian);
+      }
+    } else {
+      throw unsupported('bitDepth', bitDepth);
+    }
   }
 
   private readTileData(ifd: TiffIfd): void {
@@ -300,12 +331,9 @@ export default class TIFFDecoder extends IOBuffer {
     const nwidth = Math.floor((width + twidth - 1) / twidth);
     const nheight = Math.floor((height + theight - 1) / theight);
 
-    const bitDepth = ifd.bitsPerSample;
-    const sampleFormat = ifd.sampleFormat;
-
     // Result Data
     
-    const data = getDataArray(size, bitDepth, sampleFormat);
+    const data = getDataArray(size, ifd.bitsPerSample, ifd.sampleFormat);
     const endian = this.isLittleEndian();
 
     for(let nx = 0; nx < nwidth; ++nx){
@@ -342,25 +370,6 @@ export default class TIFFDecoder extends IOBuffer {
     }
 
     ifd.data = data;
-  }
-
-  private fillUncompressed(
-    bitDepth: number,
-    sampleFormat: number,
-    data: DataArray,
-    stripData: DataView,
-    pixel: number,
-    length: number,
-  ): number {
-    if (bitDepth === 8) {
-      return fill8bit(data, stripData, pixel, length);
-    } else if (bitDepth === 16) {
-      return fill16bit(data, stripData, pixel, length, this.isLittleEndian());
-    } else if (bitDepth === 32 && sampleFormat === 3) {
-      return fillFloat32(data, stripData, pixel, length, this.isLittleEndian());
-    } else {
-      throw unsupported('bitDepth', bitDepth);
-    }
   }
 
   private applyPredictor(ifd: TiffIfd): void {
@@ -425,44 +434,6 @@ function getDataArray(
       `${bitDepth} / ${sampleFormat}`,
     );
   }
-}
-
-function fill8bit(
-  dataTo: DataArray,
-  dataFrom: DataView,
-  index: number,
-  length: number,
-): number {
-  for (let i = 0; i < length; i++) {
-    dataTo[index++] = dataFrom.getUint8(i);
-  }
-  return index;
-}
-
-function fill16bit(
-  dataTo: DataArray,
-  dataFrom: DataView,
-  index: number,
-  length: number,
-  littleEndian: boolean,
-): number {
-  for (let i = 0; i < length * 2; i += 2) {
-    dataTo[index++] = dataFrom.getUint16(i, littleEndian);
-  }
-  return index;
-}
-
-function fillFloat32(
-  dataTo: DataArray,
-  dataFrom: DataView,
-  index: number,
-  length: number,
-  littleEndian: boolean,
-): number {
-  for (let i = 0; i < length * 4; i += 4) {
-    dataTo[index++] = dataFrom.getFloat32(i, littleEndian);
-  }
-  return index;
 }
 
 function unsupported(type: string, value: any): Error {
