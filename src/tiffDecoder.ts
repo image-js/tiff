@@ -242,14 +242,17 @@ export default class TIFFDecoder extends IOBuffer {
 
   private readStripData(ifd: TiffIfd): void {
 
+    // General Image Dimensions
     const width = ifd.width;
     const height = ifd.height;
     const size = width * height * ifd.samplesPerPixel;
 
-    // Note: Strips are Column-Major
+    // Compressed Strip Layout
+    // Note: Strips are Row-Major
     const stripOffsets = ifd.stripOffsets;
     const stripByteCounts = ifd.stripByteCounts || guessStripByteCounts(ifd);
-    const stripLength = width * ifd.rowsPerStrip * ifd.samplesPerPixel; 
+    const littleEndian = this.isLittleEndian()
+    const stripLength = width * ifd.rowsPerStrip * ifd.samplesPerPixel;
 
     // Output Data Buffer
     const output = getDataArray(size, ifd.bitsPerSample, ifd.sampleFormat);
@@ -269,15 +272,13 @@ export default class TIFFDecoder extends IOBuffer {
       // Last strip can be smaller
       const length = Math.min(stripLength, size - start);
 
-      // Write Uncompressed Strip Data to Output
-      this.fillLinear(
-        ifd.bitsPerSample,
-        ifd.sampleFormat,
-        output,
-        uncompressed,
-        start,
-        length
-      );
+      // Write Uncompressed Strip Data to Output (Linear Layout)
+      for(let index = 0; index < length; ++index){
+
+        const value = this.sampleValue(uncompressed, index, ifd.sampleFormat, ifd.bitsPerSample, littleEndian)
+        output[start + index] = value;
+
+      }
 
       start += length;
 
@@ -286,62 +287,39 @@ export default class TIFFDecoder extends IOBuffer {
     ifd.data = output;
   }
 
-  private fillLinear (
-    bitDepth: number,
-    sampleFormat: number,
-    output: DataArray,
-    input: DataView,
-    start: number,
-    length: number,
-  ){
-    const littleEndian = this.isLittleEndian();
-    if (bitDepth === 8) {
-      for (let i = 0; i < length; ++i) {
-        output[start + i] = input.getUint8(i);
-      }
-    } else if (bitDepth === 16) {
-      for (let i = 0; i < length; ++i) {
-        output[start + i] = input.getUint16(2*i, littleEndian);
-      }
-    } else if (bitDepth === 32 && sampleFormat === 3) {
-      for (let i = 0; i < length; ++i) {
-        output[start + i] = input.getFloat32(4*i, littleEndian);
-      }
-    } else {
-      throw unsupported('bitDepth', bitDepth);
-    }
-  }
-
   private readTileData(ifd: TiffIfd): void {
 
     if(!ifd.tileWidth || !ifd.tileHeight)
       return;
 
+    // General Image Dimensions
     const width = ifd.width;
     const height = ifd.height;
     const size = width * height * ifd.samplesPerPixel;
 
-    // Tile Dimensions
+    // Tile Dimensions, Counts
     const twidth = ifd.tileWidth;
     const theight = ifd.tileHeight;
-    const tileByteCounts = ifd.tileByteCounts;
-    const tileOffsets = ifd.tileOffsets;
-
-    // Tile Counts
     const nwidth = Math.floor((width + twidth - 1) / twidth);
     const nheight = Math.floor((height + theight - 1) / theight);
 
-    // Result Data
-    
-    const data = getDataArray(size, ifd.bitsPerSample, ifd.sampleFormat);
-    const endian = this.isLittleEndian();
+    // Compressed Tile Layout
+    const tileOffsets = ifd.tileOffsets;
+    const tileByteCounts = ifd.tileByteCounts;
+    const littleEndian = this.isLittleEndian()
 
+    // Output Data Buffer    
+    const output = getDataArray(size, ifd.bitsPerSample, ifd.sampleFormat);
+
+    // Iterate over Set of Tiles
     for(let nx = 0; nx < nwidth; ++nx){
       for(let ny = 0; ny < nheight; ++ny){
 
-        const nind = nx * nheight + ny;
+        // Note: TIFF Orders Tiles Row-Major,
+        //  including the tile interiors.
+        const nind = ny * nwidth + nx;
       
-        // Tile Decompress Data
+        // Extract and Decompress Tile Data
         const tileData = new DataView(
           this.buffer,
           tileOffsets[nind],
@@ -349,27 +327,53 @@ export default class TIFFDecoder extends IOBuffer {
         );
         const uncompressed = TIFFDecoder.uncompress(tileData, ifd.compression)
 
-        // Copy Data into Tile
-        for(let ix = 0; ix < twidth; ++ix){
-          for(let iy = 0; iy < theight; ++iy){
+        // Write Uncompressed Tile Data to Output
+        for(let tx = 0; tx < twidth; ++tx){
+          for(let ty = 0; ty < theight; ++ty){
 
-            const tposx = ix;
-            const tposy = iy;
-            const fposx = nx * twidth + tposx;
-            const fposy = ny * theight + tposy;
-            if(fposx >= width) continue;
-            if(fposy >= height) continue;
+            const ix = nx * twidth + tx;
+            const iy = ny * theight + ty;
+            if(ix >= width) continue;
+            if(iy >= height) continue;
 
-            const ind_out = ((width - 1 - fposx) * height + fposy);
-            const ind_in = (tposx * theight + tposy);
-            data[ind_out] = uncompressed.getFloat32(4*ind_in, endian);
+            const index = (ty * twidth + tx);
+            const value = this.sampleValue(uncompressed, index, ifd.sampleFormat, ifd.bitsPerSample, littleEndian);
+            
+            const ind_out = (iy * width + ix);
+            output[ind_out] = value;
 
           }
         }
       }
     }
 
-    ifd.data = data;
+    ifd.data = output;
+  }
+
+  //! sampleValue retrieves a single, typed value
+  //! from a DataView while considering the format,
+  //! bitDepth and endianness.
+  //!
+  //! As this is called once per iteration, it would make
+  //! sense to convert this to a switch or if statement 
+  //! over an enumerator instead of a parameter.
+  //! 
+  private sampleValue (
+    data: DataView,
+    index: number,
+    sampleFormat: number,
+    bitDepth: number,
+    littleEndian: boolean
+  ): number {
+    if (bitDepth === 8) {
+      return data.getUint8(index);
+    } else if (bitDepth === 16) {
+      return data.getUint16(2*index, littleEndian);
+    } else if (bitDepth === 32 && sampleFormat === 3) {
+      return data.getFloat32(4*index, littleEndian);
+    } else {
+      throw unsupported('bitDepth', bitDepth);
+    }
   }
 
   private applyPredictor(ifd: TiffIfd): void {
