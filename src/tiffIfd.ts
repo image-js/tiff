@@ -160,10 +160,12 @@ export default class TiffIfd extends Ifd {
     return alwaysArray(this.get('TileByteCounts'));
   }
   public get tiled(): boolean {
-    return (this.tileWidth !== undefined) 
-    && (this.tileHeight !== undefined) 
-    && (this.tileOffsets !== undefined) 
-    && (this.tileByteCounts !== undefined);
+    return (
+      this.tileWidth !== undefined &&
+      this.tileHeight !== undefined &&
+      this.tileOffsets !== undefined &&
+      this.tileByteCounts !== undefined
+    );
   }
 }
 
