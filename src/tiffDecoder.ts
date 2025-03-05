@@ -371,6 +371,8 @@ export default class TIFFDecoder extends IOBuffer {
       return data.getUint16(2*index, littleEndian);
     } else if (bitDepth === 32 && sampleFormat === 3) {
       return data.getFloat32(4*index, littleEndian);
+    } else if (bitDepth === 64 && sampleFormat === 3) {
+      return data.getFloat64(8*index, littleEndian);
     } else {
       throw unsupported('bitDepth', bitDepth);
     }
