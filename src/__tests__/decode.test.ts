@@ -157,6 +157,14 @@ const files: TiffFile[] = [
     alpha: false,
   },
   {
+    name: 'float64.tif',
+    width: 851,
+    height: 338,
+    bitsPerSample: 64,
+    components: 1,
+    alpha: false,
+  },
+  {
     name: 'black.tif',
     width: 9192,
     height: 2690,
