@@ -214,7 +214,7 @@ export default class TIFFDecoder extends IOBuffer {
     }
   }
 
-  private static uncompress(data: DataView, compression: number = 1): DataView {
+  private static uncompress(data: DataView, compression = 1): DataView {
 
     switch (compression) {
       // No compression, nothing to do
@@ -289,8 +289,9 @@ export default class TIFFDecoder extends IOBuffer {
 
   private readTileData(ifd: TiffIfd): void {
 
-    if(!ifd.tileWidth || !ifd.tileHeight)
+    if(!ifd.tileWidth || !ifd.tileHeight){
       return;
+    }
 
     // General Image Dimensions
     const width = ifd.width;
@@ -339,8 +340,8 @@ export default class TIFFDecoder extends IOBuffer {
             const index = (ty * twidth + tx);
             const value = this.sampleValue(uncompressed, index, ifd.sampleFormat, ifd.bitsPerSample, littleEndian);
             
-            const ind_out = (iy * width + ix);
-            output[ind_out] = value;
+            const indexOut = (iy * width + ix);
+            output[indexOut] = value;
 
           }
         }
