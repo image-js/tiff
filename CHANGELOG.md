@@ -1,5 +1,13 @@
 # Changelog
 
+## [6.2.0](https://github.com/image-js/tiff/compare/v6.1.1...v6.2.0) (2025-03-06)
+
+
+### Features
+
+* add float64 support ([#59](https://github.com/image-js/tiff/issues/59)) ([a164636](https://github.com/image-js/tiff/commit/a1646369615fe775fc0f3bcd166cbf9ed816138b))
+* add tiled image support ([#62](https://github.com/image-js/tiff/issues/62)) ([8b1c922](https://github.com/image-js/tiff/commit/8b1c9220343831305967a220b0a9d39e0855aca7))
+
 ## [6.1.1](https://github.com/image-js/tiff/compare/v6.1.0...v6.1.1) (2024-09-12)
 
 
