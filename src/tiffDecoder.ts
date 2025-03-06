@@ -193,7 +193,11 @@ export default class TIFFDecoder extends IOBuffer {
       case 1: // BlackIsZero
       case 2: // RGB
       case 3: // Palette color
-        this.readStripData(ifd);
+        if (ifd.tiled) {
+          this.readTileData(ifd);
+        } else {
+          this.readStripData(ifd);
+        }
         break;
       default:
         throw unsupported('image type', ifd.type);
@@ -210,88 +214,167 @@ export default class TIFFDecoder extends IOBuffer {
     }
   }
 
+  private static uncompress(data: DataView, compression = 1): DataView {
+    switch (compression) {
+      // No compression, nothing to do
+      case 1: {
+        return data;
+      }
+      // LZW compression
+      case 5: {
+        return decompressLzw(data);
+      }
+      // Zlib and Deflate compressions. They are identical.
+      case 8:
+      case 32946: {
+        return decompressZlib(data);
+      }
+      case 2: // CCITT Group 3 1-Dimensional Modified Huffman run length encoding
+        throw unsupported('Compression', 'CCITT Group 3');
+      case 32773: // PackBits compression
+        throw unsupported('Compression', 'PackBits');
+      default:
+        throw unsupported('Compression', compression);
+    }
+  }
+
   private readStripData(ifd: TiffIfd): void {
+    // General Image Dimensions
     const width = ifd.width;
     const height = ifd.height;
-
-    const bitDepth = ifd.bitsPerSample;
-    const sampleFormat = ifd.sampleFormat;
     const size = width * height * ifd.samplesPerPixel;
-    const data = getDataArray(size, bitDepth, sampleFormat);
 
-    const rowsPerStrip = ifd.rowsPerStrip;
-    const maxPixels = rowsPerStrip * width * ifd.samplesPerPixel;
+    // Compressed Strip Layout
+    // Note: Strips are Row-Major
     const stripOffsets = ifd.stripOffsets;
     const stripByteCounts = ifd.stripByteCounts || guessStripByteCounts(ifd);
+    const littleEndian = this.isLittleEndian();
+    const stripLength = width * ifd.rowsPerStrip * ifd.samplesPerPixel;
 
-    let remainingPixels = size;
-    let pixel = 0;
+    // Output Data Buffer
+    const output = getDataArray(size, ifd.bitsPerSample, ifd.sampleFormat);
+
+    // Iterate over Number of Strips
+    let start = 0;
     for (let i = 0; i < stripOffsets.length; i++) {
+      // Extract Strip Data, Uncompress
       const stripData = new DataView(
         this.buffer,
         this.byteOffset + stripOffsets[i],
         stripByteCounts[i],
       );
+      const uncompressed = TIFFDecoder.uncompress(stripData, ifd.compression);
 
       // Last strip can be smaller
-      const length = remainingPixels > maxPixels ? maxPixels : remainingPixels;
-      remainingPixels -= length;
+      const length = Math.min(stripLength, size - start);
 
-      let dataToFill = stripData;
-
-      switch (ifd.compression) {
-        case 1: {
-          // No compression, nothing to do
-          break;
-        }
-        case 5: {
-          // LZW compression
-          dataToFill = decompressLzw(stripData);
-          break;
-        }
-        case 8:
-        case 32946: {
-          // Zlib and Deflate compressions. They are identical.
-          dataToFill = decompressZlib(stripData);
-          break;
-        }
-        case 2: // CCITT Group 3 1-Dimensional Modified Huffman run length encoding
-          throw unsupported('Compression', 'CCITT Group 3');
-        case 32773: // PackBits compression
-          throw unsupported('Compression', 'PackBits');
-        default:
-          throw unsupported('Compression', ifd.compression);
+      // Write Uncompressed Strip Data to Output (Linear Layout)
+      for (let index = 0; index < length; ++index) {
+        const value = this.sampleValue(
+          uncompressed,
+          index,
+          ifd.sampleFormat,
+          ifd.bitsPerSample,
+          littleEndian,
+        );
+        output[start + index] = value;
       }
 
-      pixel = this.fillUncompressed(
-        bitDepth,
-        sampleFormat,
-        data,
-        dataToFill,
-        pixel,
-        length,
-      );
+      start += length;
     }
 
-    ifd.data = data;
+    ifd.data = output;
   }
 
-  private fillUncompressed(
-    bitDepth: number,
+  private readTileData(ifd: TiffIfd): void {
+    if (!ifd.tileWidth || !ifd.tileHeight) {
+      return;
+    }
+
+    // General Image Dimensions
+    const width = ifd.width;
+    const height = ifd.height;
+    const size = width * height * ifd.samplesPerPixel;
+
+    // Tile Dimensions, Counts
+    const twidth = ifd.tileWidth;
+    const theight = ifd.tileHeight;
+    const nwidth = Math.floor((width + twidth - 1) / twidth);
+    const nheight = Math.floor((height + theight - 1) / theight);
+
+    // Compressed Tile Layout
+    const tileOffsets = ifd.tileOffsets;
+    const tileByteCounts = ifd.tileByteCounts;
+    const littleEndian = this.isLittleEndian();
+
+    // Output Data Buffer
+    const output = getDataArray(size, ifd.bitsPerSample, ifd.sampleFormat);
+
+    // Iterate over Set of Tiles
+    for (let nx = 0; nx < nwidth; ++nx) {
+      for (let ny = 0; ny < nheight; ++ny) {
+        // Note: TIFF Orders Tiles Row-Major,
+        //  including the tile interiors.
+        const nind = ny * nwidth + nx;
+
+        // Extract and Decompress Tile Data
+        const tileData = new DataView(
+          this.buffer,
+          tileOffsets[nind],
+          tileByteCounts[nind],
+        );
+        const uncompressed = TIFFDecoder.uncompress(tileData, ifd.compression);
+
+        // Write Uncompressed Tile Data to Output
+        for (let tx = 0; tx < twidth; ++tx) {
+          for (let ty = 0; ty < theight; ++ty) {
+            const ix = nx * twidth + tx;
+            const iy = ny * theight + ty;
+            if (ix >= width) continue;
+            if (iy >= height) continue;
+
+            const index = ty * twidth + tx;
+            const value = this.sampleValue(
+              uncompressed,
+              index,
+              ifd.sampleFormat,
+              ifd.bitsPerSample,
+              littleEndian,
+            );
+
+            const indexOut = iy * width + ix;
+            output[indexOut] = value;
+          }
+        }
+      }
+    }
+
+    ifd.data = output;
+  }
+
+  //! sampleValue retrieves a single, typed value
+  //! from a DataView while considering the format,
+  //! bitDepth and endianness.
+  //!
+  //! As this is called once per iteration, it would make
+  //! sense to convert this to a switch or if statement
+  //! over an enumerator instead of a parameter.
+  //!
+  private sampleValue(
+    data: DataView,
+    index: number,
     sampleFormat: number,
-    data: DataArray,
-    stripData: DataView,
-    pixel: number,
-    length: number,
+    bitDepth: number,
+    littleEndian: boolean,
   ): number {
     if (bitDepth === 8) {
-      return fill8bit(data, stripData, pixel, length);
+      return data.getUint8(index);
     } else if (bitDepth === 16) {
-      return fill16bit(data, stripData, pixel, length, this.isLittleEndian());
+      return data.getUint16(2 * index, littleEndian);
     } else if (bitDepth === 32 && sampleFormat === 3) {
-      return fillFloat32(data, stripData, pixel, length, this.isLittleEndian());
+      return data.getFloat32(4 * index, littleEndian);
     } else if (bitDepth === 64 && sampleFormat === 3) {
-      return fillFloat64(data, stripData, pixel, length, this.isLittleEndian());
+      return data.getFloat64(8 * index, littleEndian);
     } else {
       throw unsupported('bitDepth', bitDepth);
     }
@@ -361,57 +444,6 @@ function getDataArray(
       `${bitDepth} / ${sampleFormat}`,
     );
   }
-}
-
-function fill8bit(
-  dataTo: DataArray,
-  dataFrom: DataView,
-  index: number,
-  length: number,
-): number {
-  for (let i = 0; i < length; i++) {
-    dataTo[index++] = dataFrom.getUint8(i);
-  }
-  return index;
-}
-
-function fill16bit(
-  dataTo: DataArray,
-  dataFrom: DataView,
-  index: number,
-  length: number,
-  littleEndian: boolean,
-): number {
-  for (let i = 0; i < length * 2; i += 2) {
-    dataTo[index++] = dataFrom.getUint16(i, littleEndian);
-  }
-  return index;
-}
-
-function fillFloat32(
-  dataTo: DataArray,
-  dataFrom: DataView,
-  index: number,
-  length: number,
-  littleEndian: boolean,
-): number {
-  for (let i = 0; i < length * 4; i += 4) {
-    dataTo[index++] = dataFrom.getFloat32(i, littleEndian);
-  }
-  return index;
-}
-
-function fillFloat64(
-  dataTo: DataArray,
-  dataFrom: DataView,
-  index: number,
-  length: number,
-  littleEndian: boolean,
-): number {
-  for (let i = 0; i < length * 8; i += 8) {
-    dataTo[index++] = dataFrom.getFloat64(i, littleEndian);
-  }
-  return index;
 }
 
 function unsupported(type: string, value: any): Error {

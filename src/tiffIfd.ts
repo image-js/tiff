@@ -147,6 +147,26 @@ export default class TiffIfd extends Ifd {
     }
     return palette;
   }
+  public get tileWidth(): number | undefined {
+    return this.get('TileWidth');
+  }
+  public get tileHeight(): number | undefined {
+    return this.get('TileLength');
+  }
+  public get tileOffsets(): number[] {
+    return alwaysArray(this.get('TileOffsets'));
+  }
+  public get tileByteCounts(): number[] {
+    return alwaysArray(this.get('TileByteCounts'));
+  }
+  public get tiled(): boolean {
+    return (
+      this.tileWidth !== undefined &&
+      this.tileHeight !== undefined &&
+      this.tileOffsets !== undefined &&
+      this.tileByteCounts !== undefined
+    );
+  }
 }
 
 function alwaysArray(value: number | number[]): number[] {

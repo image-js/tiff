@@ -180,6 +180,14 @@ const files: TiffFile[] = [
     components: 3,
     alpha: false,
   },
+  {
+    name: 'tiled.tif',
+    width: 2501,
+    height: 2001,
+    bitsPerSample: 32,
+    components: 1,
+    alpha: false,
+  },
 ];
 const cases = files.map(
   (file) => [file.name, file, readImage(file.name)] as const,
