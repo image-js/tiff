@@ -1,9 +1,9 @@
-import { tagsById as exif } from './tags/exif';
-import { tagsById as gps } from './tags/gps';
-import { tagsById as standard } from './tags/standard';
-import TIFFDecoder from './tiffDecoder';
-import type TiffIfd from './tiffIfd';
-import type { BufferType, DecodeOptions } from './types';
+import { tagsById as exif } from './tags/exif.ts';
+import { tagsById as gps } from './tags/gps.ts';
+import { tagsById as standard } from './tags/standard.ts';
+import TIFFDecoder from './tiffDecoder.ts';
+import type TiffIfd from './tiffIfd.ts';
+import type { BufferType, DecodeOptions } from './types.ts';
 
 export function decode(data: BufferType, options?: DecodeOptions): TiffIfd[] {
   const decoder = new TIFFDecoder(data);
@@ -26,5 +26,5 @@ export const tagNames = {
   standard,
 };
 
-export { type DecodeOptions } from './types';
-export { default as TiffIfd } from './tiffIfd';
+export { type DecodeOptions } from './types.ts';
+export { default as TiffIfd } from './tiffIfd.ts';

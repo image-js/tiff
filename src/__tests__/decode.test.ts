@@ -3,7 +3,7 @@ import { join } from 'node:path';
 
 import { expect, test } from 'vitest';
 
-import { decode } from '..';
+import { decode } from '../index.ts';
 
 function readImage(file: string): Buffer {
   return readFileSync(join(__dirname, '../../img', file));

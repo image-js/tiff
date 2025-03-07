@@ -1,4 +1,4 @@
-import type TIFFDecoder from './tiffDecoder';
+import type TIFFDecoder from './tiffDecoder.ts';
 
 const types = new Map<
   number,

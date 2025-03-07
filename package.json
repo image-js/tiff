@@ -2,6 +2,7 @@
   "name": "tiff",
   "version": "6.2.0",
   "description": "TIFF image decoder written entirely in JavaScript",
+  "type": "module",
   "main": "lib/index.js",
   "module": "lib-esm/index.js",
   "types": "lib/index.d.ts",

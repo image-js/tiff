@@ -3,7 +3,7 @@ import { join } from 'node:path';
 
 import { describe, expect, it } from 'vitest';
 
-import { decode } from '..';
+import { decode } from '../index.ts';
 
 // We can decompress images using 'convert' from imagemagick
 // convert image-lzw.tif -define colorspace:auto-grayscale=false -type truecolor image.tif

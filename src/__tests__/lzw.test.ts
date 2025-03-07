@@ -3,7 +3,7 @@ import { join } from 'node:path';
 
 import { describe, expect, it } from 'vitest';
 
-import { decompressLzw } from '../lzw';
+import { decompressLzw } from '../lzw.ts';
 
 describe('lzw', () => {
   it('1', () => {

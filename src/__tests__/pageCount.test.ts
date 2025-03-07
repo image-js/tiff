@@ -3,7 +3,7 @@ import { join } from 'node:path';
 
 import { expect, test } from 'vitest';
 
-import { pageCount } from '..';
+import { pageCount } from '../index.ts';
 
 const files = [
   { name: 'grey8.tif', pages: 1 },

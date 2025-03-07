@@ -1,11 +1,28 @@
 {
   "compilerOptions": {
-    "esModuleInterop": true,
-    "moduleResolution": "node",
-    "sourceMap": true,
+    "lib": ["ES2022"],
+    "types": [],
+
+    "module": "NodeNext",
+    "target": "ES2022",
+    "jsx": "react-jsx",
+
     "strict": true,
     "skipLibCheck": true,
-    "target": "es2022"
+    "noUncheckedIndexedAccess": false,
+
+    "allowJs": false,
+    "isolatedModules": true,
+    "verbatimModuleSyntax": true,
+    "resolveJsonModule": false,
+    "allowImportingTsExtensions": true,
+    "rewriteRelativeImportExtensions": true,
+    "forceConsistentCasingInFileNames": true,
+
+    "outDir": "lib",
+    "sourceMap": true,
+    "declaration": true,
+    "declarationMap": true
   },
-  "include": ["./src/**/*"]
+  "include": ["src", "vite*.ts"]
 }

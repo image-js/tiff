@@ -1,4 +1,4 @@
-import type TiffIfd from './tiffIfd';
+import type TiffIfd from './tiffIfd.ts';
 
 export function guessStripByteCounts(ifd: TiffIfd): number[] {
   if (ifd.compression !== 1) {

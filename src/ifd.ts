@@ -1,7 +1,7 @@
-import * as exif from './tags/exif';
-import * as gps from './tags/gps';
-import * as standard from './tags/standard';
-import type { DataArray, IFDKind } from './types';
+import * as exif from './tags/exif.ts';
+import * as gps from './tags/gps.ts';
+import * as standard from './tags/standard.ts';
+import type { DataArray, IFDKind } from './types.ts';
 
 const tags = {
   standard,
@@ -17,7 +17,7 @@ export default class IFD {
   public gps: IFD | undefined;
 
   private _hasMap: boolean;
-  private _map: any;
+  private _map: Record<string, any>;
 
   public constructor(kind: IFDKind) {
     if (!kind) {

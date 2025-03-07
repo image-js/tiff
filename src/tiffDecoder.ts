@@ -1,16 +1,16 @@
 import { IOBuffer } from 'iobuffer';
 
-import { guessStripByteCounts } from './hacks';
+import { guessStripByteCounts } from './hacks.ts';
 import {
   applyHorizontalDifferencing16Bit,
   applyHorizontalDifferencing8Bit,
-} from './horizontalDifferencing';
-import IFD from './ifd';
-import { getByteLength, readData } from './ifdValue';
-import { decompressLzw } from './lzw';
-import TiffIfd from './tiffIfd';
-import type { BufferType, DataArray, DecodeOptions, IFDKind } from './types';
-import { decompressZlib } from './zlib';
+} from './horizontalDifferencing.ts';
+import IFD from './ifd.ts';
+import { getByteLength, readData } from './ifdValue.ts';
+import { decompressLzw } from './lzw.ts';
+import TiffIfd from './tiffIfd.ts';
+import type { BufferType, DataArray, DecodeOptions, IFDKind } from './types.ts';
+import { decompressZlib } from './zlib.ts';
 
 const defaultOptions: DecodeOptions = {
   ignoreImageData: false,
