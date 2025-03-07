@@ -1,4 +1,4 @@
-import { IOBuffer } from 'iobuffer';
+import type { IOBuffer } from 'iobuffer';
 
 export type BufferType = ArrayBufferLike | ArrayBufferView | IOBuffer | Buffer;
 

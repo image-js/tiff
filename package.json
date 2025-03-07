@@ -19,7 +19,7 @@
     "prettier": "prettier --check src",
     "prettier-write": "prettier --write src",
     "test": "npm run test-only && npm run eslint && npm run prettier && npm run check-types",
-    "test-only": "jest --coverage",
+    "test-only": "vitest run --coverage",
     "tsc": "npm run clean && npm run tsc-cjs && npm run tsc-esm",
     "tsc-cjs": "tsc --project tsconfig.cjs.json",
     "tsc-esm": "tsc --project tsconfig.esm.json"
@@ -34,31 +34,20 @@
     "url": "https://github.com/image-js/tiff/issues"
   },
   "homepage": "https://github.com/image-js/tiff#readme",
-  "jest": {
-    "preset": "ts-jest",
-    "testEnvironment": "node"
-  },
   "dependencies": {
-    "iobuffer": "^5.3.2",
+    "iobuffer": "^5.4.0",
     "pako": "^2.1.0"
   },
   "devDependencies": {
-    "@types/jest": "^29.5.11",
-    "@types/node": "^20.10.5",
+    "@types/node": "^22.13.9",
     "@types/pako": "^2.0.3",
-    "eslint": "^8.56.0",
-    "eslint-config-cheminfo-typescript": "^12.1.0",
-    "jest": "^29.7.0",
-    "prettier": "^3.1.1",
-    "rimraf": "^5.0.5",
-    "ts-jest": "^29.1.1",
-    "typescript": "^5.3.3"
-  },
-  "prettier": {
-    "arrowParens": "always",
-    "semi": true,
-    "singleQuote": true,
-    "tabWidth": 2,
-    "trailingComma": "all"
+    "@vitest/coverage-istanbul": "^3.0.8",
+    "@vitest/coverage-v8": "^3.0.8",
+    "eslint": "^9.21.0",
+    "eslint-config-cheminfo-typescript": "^17.0.0",
+    "prettier": "^3.5.3",
+    "rimraf": "^6.0.1",
+    "typescript": "^5.8.2",
+    "vitest": "^3.0.8"
   }
 }

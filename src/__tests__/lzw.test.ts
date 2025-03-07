@@ -1,5 +1,7 @@
-import { readFileSync } from 'fs';
-import { join } from 'path';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
+
+import { describe, expect, it } from 'vitest';
 
 import { decompressLzw } from '../lzw';
 
@@ -15,7 +17,7 @@ describe('lzw', () => {
         result.buffer,
         result.byteOffset,
         result.byteLength,
-      ).reduce((sum, current) => (sum += current), 0),
+      ).reduce((sum, current) => sum + current, 0),
     ).toBe(675);
   });
   it('173', () => {
@@ -29,7 +31,7 @@ describe('lzw', () => {
         result.buffer,
         result.byteOffset,
         result.byteLength,
-      ).reduce((sum, current) => (sum += current), 0),
+      ).reduce((sum, current) => sum + current, 0),
     ).toBe(38307);
   });
   it('174', () => {

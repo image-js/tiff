@@ -1,4 +1,4 @@
-import TIFFDecoder from './tiffDecoder';
+import type TIFFDecoder from './tiffDecoder';
 
 const types = new Map<
   number,
@@ -47,7 +47,7 @@ function readASCII(decoder: TIFFDecoder, count: number): string | string[] {
   const strings = [];
   let currentString = '';
   for (let i = 0; i < count; i++) {
-    const char = String.fromCharCode(decoder.readUint8());
+    const char = String.fromCodePoint(decoder.readUint8());
     if (char === '\0') {
       strings.push(currentString);
       currentString = '';

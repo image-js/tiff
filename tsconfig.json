@@ -4,7 +4,8 @@
     "moduleResolution": "node",
     "sourceMap": true,
     "strict": true,
-    "target": "es2020"
+    "skipLibCheck": true,
+    "target": "es2022"
   },
   "include": ["./src/**/*"]
 }

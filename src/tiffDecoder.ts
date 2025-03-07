@@ -2,14 +2,14 @@ import { IOBuffer } from 'iobuffer';
 
 import { guessStripByteCounts } from './hacks';
 import {
-  applyHorizontalDifferencing8Bit,
   applyHorizontalDifferencing16Bit,
+  applyHorizontalDifferencing8Bit,
 } from './horizontalDifferencing';
 import IFD from './ifd';
 import { getByteLength, readData } from './ifdValue';
 import { decompressLzw } from './lzw';
 import TiffIfd from './tiffIfd';
-import { BufferType, DecodeOptions, IFDKind, DataArray } from './types';
+import type { BufferType, DataArray, DecodeOptions, IFDKind } from './types';
 import { decompressZlib } from './zlib';
 
 const defaultOptions: DecodeOptions = {

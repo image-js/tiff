@@ -1,7 +1,7 @@
 {
   "extends": "./tsconfig.cjs.json",
   "compilerOptions": {
-    "module": "es2015",
+    "module": "es2022",
     "outDir": "lib-esm",
     "declaration": false
   }
