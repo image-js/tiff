@@ -46,6 +46,13 @@ const files: TiffFile[] = [
     components: 3,
   },
   {
+    name: 'color8-jpeg.tif',
+    width: 160,
+    height: 120,
+    bitsPerSample: 8,
+    components: 3,
+  },
+  {
     name: 'color8-lzw.tif',
     width: 160,
     height: 120,
@@ -185,6 +192,14 @@ const files: TiffFile[] = [
     width: 2501,
     height: 2001,
     bitsPerSample: 32,
+    components: 1,
+    alpha: false,
+  },
+  {
+    name: 'tiled-jpeg.tif',
+    width: 1,
+    height: 1,
+    bitsPerSample: 8,
     components: 1,
     alpha: false,
   },
