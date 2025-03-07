@@ -1,22 +1,20 @@
-# tiff
-
-TIFF image decoder written entirely in JavaScript.
-
 <h3 align="center">
-
   <a href="https://www.zakodium.com">
     <img src="https://www.zakodium.com/brand/zakodium-logo-white.svg" width="50" alt="Zakodium logo" />
   </a>
-
   <p>
     Maintained by <a href="https://www.zakodium.com">Zakodium</a>
   </p>
+</h3>
+
+# tiff
 
 [![NPM version][npm-image]][npm-url]
-[![build status][ci-image]][ci-url]
 [![npm download][download-image]][download-url]
+[![test coverage][codecov-image]][codecov-url]
+[![license][license-image]][license-url]
 
-</h3>
+TIFF image decoder written entirely in TypeScript.
 
 ## Installation
 
@@ -37,7 +35,7 @@ Images compressed with Zlib/deflate algorithm are also supported.
 
 ## API
 
-### tiff.decode(data[, options])
+### `tiff.decode(data[, options])`
 
 Decodes the file and returns TIFF IFDs.
 
@@ -62,11 +60,11 @@ The `data` property is a Typed Array containing the pixel data. It is a
 - `yResolution`
 - `resolutionUnit`
 
-### tiff.pageCount(data)
+### `tiff.pageCount(data)`
 
 Returns the number of IFDs (pages) in the file.
 
-### tiff.isMultiPage(data)
+### `tiff.isMultiPage(data)`
 
 Returns true if the file has 2 or more IFDs (pages) and false if it has 1.
 This is slightly more efficient than calling `pageCount()` if all you need to
@@ -78,9 +76,9 @@ know is whether the file has multiple pages or not.
 
 [npm-image]: https://img.shields.io/npm/v/tiff.svg
 [npm-url]: https://www.npmjs.com/package/tiff
-[ci-image]: https://github.com/image-js/tiff/workflows/Node.js%20CI/badge.svg?branch=main
-[ci-url]: https://github.com/image-js/tiff/actions?query=workflow%3A%22Node.js+CI%22
-[codecov-image]: https://img.shields.io/codecov/c/github/image-js/tiff.svg
-[codecov-url]: https://codecov.io/gh/image-js/tiff
 [download-image]: https://img.shields.io/npm/dm/tiff.svg
 [download-url]: https://www.npmjs.com/package/tiff
+[codecov-image]: https://img.shields.io/codecov/c/github/image-js/tiff.svg
+[codecov-url]: https://app.codecov.io/gh/image-js/tiff
+[license-image]: https://img.shields.io/npm/l/tiff.svg
+[license-url]: https://github.com/image-js/tiff/blob/main/LICENSE
