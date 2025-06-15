@@ -1,7 +1,3 @@
-import { IOBuffer } from 'iobuffer';
-
-export type BufferType = ArrayBufferLike | ArrayBufferView | IOBuffer | Buffer;
-
 export interface DecodeOptions {
   ignoreImageData?: boolean;
   /**

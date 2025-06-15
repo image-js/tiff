@@ -9,17 +9,17 @@
 
 # tiff
 
-[![NPM version][npm-image]][npm-url]
-[![npm download][download-image]][download-url]
-[![test coverage][codecov-image]][codecov-url]
-[![license][license-image]][license-url]
+[![NPM version](https://img.shields.io/npm/v/tiff.svg)](https://www.npmjs.com/package/tiff)
+[![npm download](https://img.shields.io/npm/dm/tiff.svg)](https://www.npmjs.com/package/tiff)
+[![test coverage](https://img.shields.io/codecov/c/github/image-js/tiff.svg)](https://codecov.io/gh/image-js/tiff)
+[![license](https://img.shields.io/npm/l/tiff.svg)](https://github.com/image-js/tiff/blob/main/LICENSE)
 
-TIFF image decoder written entirely in TypeScript.
+TIFF image decoder written entirely in JavaScript.
 
 ## Installation
 
 ```console
-npm i tiff
+npm install tiff
 ```
 
 ## Compatibility
@@ -34,6 +34,8 @@ It supports LZW compression and images with an additional alpha channel.
 Images compressed with Zlib/deflate algorithm are also supported.
 
 ## API
+
+### [Complete API documentation](https://image-js.github.io/tiff/)
 
 ### `tiff.decode(data[, options])`
 
@@ -73,12 +75,3 @@ know is whether the file has multiple pages or not.
 ## License
 
 [MIT](./LICENSE)
-
-[npm-image]: https://img.shields.io/npm/v/tiff.svg
-[npm-url]: https://www.npmjs.com/package/tiff
-[download-image]: https://img.shields.io/npm/dm/tiff.svg
-[download-url]: https://www.npmjs.com/package/tiff
-[codecov-image]: https://img.shields.io/codecov/c/github/image-js/tiff.svg
-[codecov-url]: https://app.codecov.io/gh/image-js/tiff
-[license-image]: https://img.shields.io/npm/l/tiff.svg
-[license-url]: https://github.com/image-js/tiff/blob/main/LICENSE

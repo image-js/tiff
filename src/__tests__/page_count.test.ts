@@ -1,7 +1,9 @@
-import { readFileSync } from 'fs';
-import { join } from 'path';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 
-import { isMultiPage } from '..';
+import { expect, test } from 'vitest';
+
+import { pageCount } from '../index.ts';
 
 const files = [
   { name: 'grey8.tif', pages: 1 },
@@ -15,12 +17,12 @@ const files = [
 ];
 // const files = ['color8c.tif'];//'grey8.tif', 'grey16.tif', 'color8.tif', 'color16.tif'];
 const contents = files.map((file) =>
-  readFileSync(join(__dirname, '../../img', file.name)),
+  readFileSync(join(import.meta.dirname, '../../img', file.name)),
 );
 
-test('TIFF isMultiPage', () => {
+test('TIFF pageCount', () => {
   for (let i = 0; i < contents.length; i++) {
-    const result = isMultiPage(contents[i]);
-    expect(result).toBe(files[i].pages > 1);
+    const result = pageCount(contents[i]);
+    expect(result).toBe(files[i].pages);
   }
 });

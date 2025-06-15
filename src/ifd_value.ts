@@ -1,4 +1,4 @@
-import TIFFDecoder from './tiffDecoder';
+import type TIFFDecoder from './tiff_decoder.ts';
 
 const types = new Map<
   number,
@@ -47,6 +47,7 @@ function readASCII(decoder: TIFFDecoder, count: number): string | string[] {
   const strings = [];
   let currentString = '';
   for (let i = 0; i < count; i++) {
+    // eslint-disable-next-line unicorn/prefer-code-point
     const char = String.fromCharCode(decoder.readUint8());
     if (char === '\0') {
       strings.push(currentString);
