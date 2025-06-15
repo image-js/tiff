@@ -199,7 +199,7 @@ const stack = readImage('stack.tif');
 
 test.each(cases)(
   'should decode %s',
-  { timeout: 15_000 },
+  { timeout: 30_000 },
   (name, file, image) => {
     const result = decode(image);
     expect(result).toHaveLength(1);

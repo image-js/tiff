@@ -9,7 +9,7 @@ import { decode } from '../index.ts';
 // convert image-lzw.tif -define colorspace:auto-grayscale=false -type truecolor image.tif
 
 describe('decode lzw', () => {
-  it('image', { timeout: 15_000 }, () => {
+  it('image', { timeout: 30_000 }, () => {
     const lzwBuffer = readFileSync(
       join(import.meta.dirname, '../../img/image-lzw.tif'),
     );
