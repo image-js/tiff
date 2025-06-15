@@ -1,7 +1,7 @@
-import * as exif from './tags/exif';
-import * as gps from './tags/gps';
-import * as standard from './tags/standard';
-import { IFDKind, DataArray } from './types';
+import * as exif from './tags/exif.ts';
+import * as gps from './tags/gps.ts';
+import * as standard from './tags/standard.ts';
+import type { DataArray, IFDKind } from './types.ts';
 
 const tags = {
   standard,

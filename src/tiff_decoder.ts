@@ -1,16 +1,17 @@
+import type { InputData } from 'iobuffer';
 import { IOBuffer } from 'iobuffer';
 
-import { guessStripByteCounts } from './hacks';
+import { guessStripByteCounts } from './hacks.ts';
 import {
-  applyHorizontalDifferencing8Bit,
   applyHorizontalDifferencing16Bit,
-} from './horizontalDifferencing';
-import IFD from './ifd';
-import { getByteLength, readData } from './ifdValue';
-import { decompressLzw } from './lzw';
-import TiffIfd from './tiffIfd';
-import { BufferType, DecodeOptions, IFDKind, DataArray } from './types';
-import { decompressZlib } from './zlib';
+  applyHorizontalDifferencing8Bit,
+} from './horizontal_differencing.ts';
+import IFD from './ifd.ts';
+import { getByteLength, readData } from './ifd_value.ts';
+import { decompressLzw } from './lzw.ts';
+import TiffIfd from './tiff_ifd.ts';
+import type { DataArray, DecodeOptions, IFDKind } from './types.ts';
+import { decompressZlib } from './zlib.ts';
 
 const defaultOptions: DecodeOptions = {
   ignoreImageData: false,
@@ -23,7 +24,7 @@ interface InternalOptions extends DecodeOptions {
 export default class TIFFDecoder extends IOBuffer {
   private _nextIFD: number;
 
-  public constructor(data: BufferType) {
+  public constructor(data: InputData) {
     super(data);
     this._nextIFD = 0;
   }

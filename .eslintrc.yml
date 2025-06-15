@@ -1,3 +1,0 @@
-extends: cheminfo-typescript
-rules:
-  no-dupe-class-members: off

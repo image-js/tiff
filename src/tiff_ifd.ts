@@ -1,4 +1,4 @@
-import Ifd from './ifd';
+import Ifd from './ifd.ts';
 
 // eslint-disable-next-line prefer-named-capture-group
 const dateTimeRegex = /^(\d{4}):(\d{2}):(\d{2}) (\d{2}):(\d{2}):(\d{2})$/;

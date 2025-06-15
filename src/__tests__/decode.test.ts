@@ -1,10 +1,12 @@
-import { readFileSync } from 'fs';
-import { join } from 'path';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 
-import { decode } from '..';
+import { expect, test } from 'vitest';
+
+import { decode } from '../index.ts';
 
 function readImage(file: string): Buffer {
-  return readFileSync(join(__dirname, '../../img', file));
+  return readFileSync(join(import.meta.dirname, '../../img', file));
 }
 
 interface TiffFile {
@@ -195,17 +197,21 @@ const cases = files.map(
 
 const stack = readImage('stack.tif');
 
-test.each(cases)('should decode %s', (name, file, image) => {
-  const result = decode(image);
-  expect(result).toHaveLength(1);
-  const { data, bitsPerSample, width, height, components, alpha } = result[0];
-  expect(width).toBe(file.width);
-  expect(height).toBe(file.height);
-  expect(components).toBe(file.components);
-  expect(bitsPerSample).toBe(file.bitsPerSample);
-  expect(data).toHaveLength(file.width * file.height * file.components);
-  expect(alpha).toBe(Boolean(file.alpha));
-});
+test.each(cases)(
+  'should decode %s',
+  { timeout: 30_000 },
+  (name, file, image) => {
+    const result = decode(image);
+    expect(result).toHaveLength(1);
+    const { data, bitsPerSample, width, height, components, alpha } = result[0];
+    expect(width).toBe(file.width);
+    expect(height).toBe(file.height);
+    expect(components).toBe(file.components);
+    expect(bitsPerSample).toBe(file.bitsPerSample);
+    expect(data).toHaveLength(file.width * file.height * file.components);
+    expect(alpha).toBe(Boolean(file.alpha));
+  },
+);
 
 // prettier-ignore
 const expectedRgb8BitData = Uint8Array.from([

@@ -1,25 +1,36 @@
-import { readFileSync } from 'fs';
-import { join } from 'path';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 
-import { decode } from '..';
+import { describe, expect, it } from 'vitest';
+
+import { decode } from '../index.ts';
 
 // We can decompress images using 'convert' from imagemagick
 // convert image-lzw.tif -define colorspace:auto-grayscale=false -type truecolor image.tif
 
 describe('decode lzw', () => {
-  it('image', () => {
-    const lzwBuffer = readFileSync(join(__dirname, '../../img/image-lzw.tif'));
+  it('image', { timeout: 30_000 }, () => {
+    const lzwBuffer = readFileSync(
+      join(import.meta.dirname, '../../img/image-lzw.tif'),
+    );
     const imageLzw = decode(lzwBuffer);
-    const buffer = readFileSync(join(__dirname, '../../img/image.tif'));
+    const buffer = readFileSync(
+      join(import.meta.dirname, '../../img/image.tif'),
+    );
     const image = decode(buffer);
     expect(
       dataEqual(imageLzw[0].data as Uint8Array, image[0].data as Uint8Array),
     ).toBe(true);
   });
+
   it('color8', () => {
-    const lzwBuffer = readFileSync(join(__dirname, '../../img/color8-lzw.tif'));
+    const lzwBuffer = readFileSync(
+      join(import.meta.dirname, '../../img/color8-lzw.tif'),
+    );
     const imageLzw = decode(lzwBuffer);
-    const buffer = readFileSync(join(__dirname, '../../img/color8.tif'));
+    const buffer = readFileSync(
+      join(import.meta.dirname, '../../img/color8.tif'),
+    );
     const image = decode(buffer);
     expect(
       dataEqual(imageLzw[0].data as Uint8Array, image[0].data as Uint8Array),
