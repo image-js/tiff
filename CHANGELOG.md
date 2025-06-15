@@ -1,5 +1,16 @@
 # Changelog
 
+## [7.0.0](https://github.com/image-js/tiff/compare/v6.2.0...v7.0.0) (2025-06-15)
+
+
+### ⚠ BREAKING CHANGES
+
+* migrate to ESM ([#68](https://github.com/image-js/tiff/issues/68))
+
+### Code Refactoring
+
+* migrate to ESM ([#68](https://github.com/image-js/tiff/issues/68)) ([3345547](https://github.com/image-js/tiff/commit/3345547d0665da124fdf9f3a61cdf99442bd4040))
+
 ## [6.2.0](https://github.com/image-js/tiff/compare/v6.1.1...v6.2.0) (2025-03-06)
 
 
