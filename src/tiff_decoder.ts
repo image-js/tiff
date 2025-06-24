@@ -239,6 +239,27 @@ export default class TIFFDecoder extends IOBuffer {
     }
   }
 
+  private createSampleReader(
+    sampleFormat: number,
+    bitDepth: number,
+    littleEndian: boolean,
+  ): (data: DataView, index: number) => number {
+    if (bitDepth === 8) {
+      return (data: DataView, index: number) => data.getUint8(index);
+    } else if (bitDepth === 16) {
+      return (data: DataView, index: number) =>
+        data.getUint16(2 * index, littleEndian);
+    } else if (bitDepth === 32 && sampleFormat === 3) {
+      return (data: DataView, index: number) =>
+        data.getFloat32(4 * index, littleEndian);
+    } else if (bitDepth === 64 && sampleFormat === 3) {
+      return (data: DataView, index: number) =>
+        data.getFloat64(8 * index, littleEndian);
+    } else {
+      throw unsupported('bitDepth', bitDepth);
+    }
+  }
+
   private readStripData(ifd: TiffIfd): void {
     // General Image Dimensions
     const width = ifd.width;
@@ -251,7 +272,11 @@ export default class TIFFDecoder extends IOBuffer {
     const stripByteCounts = ifd.stripByteCounts || guessStripByteCounts(ifd);
     const littleEndian = this.isLittleEndian();
     const stripLength = width * ifd.rowsPerStrip * ifd.samplesPerPixel;
-
+    const readSamples = this.createSampleReader(
+      ifd.sampleFormat,
+      ifd.bitsPerSample,
+      littleEndian,
+    );
     // Output Data Buffer
     const output = getDataArray(size, ifd.bitsPerSample, ifd.sampleFormat);
 
@@ -271,13 +296,7 @@ export default class TIFFDecoder extends IOBuffer {
 
       // Write Uncompressed Strip Data to Output (Linear Layout)
       for (let index = 0; index < length; ++index) {
-        const value = this.sampleValue(
-          uncompressed,
-          index,
-          ifd.sampleFormat,
-          ifd.bitsPerSample,
-          littleEndian,
-        );
+        const value = readSamples(uncompressed, index);
         output[start + index] = value;
       }
 
@@ -307,7 +326,11 @@ export default class TIFFDecoder extends IOBuffer {
     const tileOffsets = ifd.tileOffsets;
     const tileByteCounts = ifd.tileByteCounts;
     const littleEndian = this.isLittleEndian();
-
+    const readSamples = this.createSampleReader(
+      ifd.sampleFormat,
+      ifd.bitsPerSample,
+      littleEndian,
+    );
     // Output Data Buffer
     const output = getDataArray(size, ifd.bitsPerSample, ifd.sampleFormat);
 
@@ -335,13 +358,7 @@ export default class TIFFDecoder extends IOBuffer {
             if (iy >= height) continue;
 
             const index = ty * twidth + tx;
-            const value = this.sampleValue(
-              uncompressed,
-              index,
-              ifd.sampleFormat,
-              ifd.bitsPerSample,
-              littleEndian,
-            );
+            const value = readSamples(uncompressed, index);
 
             const indexOut = iy * width + ix;
             output[indexOut] = value;
@@ -351,34 +368,6 @@ export default class TIFFDecoder extends IOBuffer {
     }
 
     ifd.data = output;
-  }
-
-  //! sampleValue retrieves a single, typed value
-  //! from a DataView while considering the format,
-  //! bitDepth and endianness.
-  //!
-  //! As this is called once per iteration, it would make
-  //! sense to convert this to a switch or if statement
-  //! over an enumerator instead of a parameter.
-  //!
-  private sampleValue(
-    data: DataView,
-    index: number,
-    sampleFormat: number,
-    bitDepth: number,
-    littleEndian: boolean,
-  ): number {
-    if (bitDepth === 8) {
-      return data.getUint8(index);
-    } else if (bitDepth === 16) {
-      return data.getUint16(2 * index, littleEndian);
-    } else if (bitDepth === 32 && sampleFormat === 3) {
-      return data.getFloat32(4 * index, littleEndian);
-    } else if (bitDepth === 64 && sampleFormat === 3) {
-      return data.getFloat64(8 * index, littleEndian);
-    } else {
-      throw unsupported('bitDepth', bitDepth);
-    }
   }
 
   private applyPredictor(ifd: TiffIfd): void {
