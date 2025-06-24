@@ -1,5 +1,12 @@
 # Changelog
 
+## [7.0.1](https://github.com/image-js/tiff/compare/v7.0.0...v7.0.1) (2025-06-24)
+
+
+### Performance Improvements
+
+* improve performance of data decoding ([#70](https://github.com/image-js/tiff/issues/70)) ([be54e07](https://github.com/image-js/tiff/commit/be54e0790216b87b269dbcfe4671c48ac512d465))
+
 ## [7.0.0](https://github.com/image-js/tiff/compare/v6.2.0...v7.0.0) (2025-06-15)
 
 
