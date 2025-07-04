@@ -246,10 +246,11 @@ export default class TIFFDecoder extends IOBuffer {
     const size = width * height * ifd.samplesPerPixel;
 
     // Compressed Strip Layout
-    // Note: Strips are Row-Major
     const stripOffsets = ifd.stripOffsets;
     const stripByteCounts = ifd.stripByteCounts || guessStripByteCounts(ifd);
     const littleEndian = this.isLittleEndian();
+
+    // For 1-bit images, calculate pixels per strip correctly
     const stripLength = width * ifd.rowsPerStrip * ifd.samplesPerPixel;
 
     // Output Data Buffer
@@ -331,8 +332,7 @@ export default class TIFFDecoder extends IOBuffer {
           for (let ty = 0; ty < theight; ++ty) {
             const ix = nx * twidth + tx;
             const iy = ny * theight + ty;
-            if (ix >= width) continue;
-            if (iy >= height) continue;
+            if (ix >= width || iy >= height) continue;
 
             const index = ty * twidth + tx;
             const value = this.sampleValue(
@@ -343,7 +343,7 @@ export default class TIFFDecoder extends IOBuffer {
               littleEndian,
             );
 
-            const indexOut = iy * width + ix;
+            const indexOut = (iy * width + ix) * ifd.samplesPerPixel;
             output[indexOut] = value;
           }
         }
@@ -368,7 +368,14 @@ export default class TIFFDecoder extends IOBuffer {
     bitDepth: number,
     littleEndian: boolean,
   ): number {
-    if (bitDepth === 8) {
+    if (bitDepth === 1) {
+      // For 1-bit data, 8 pixels are packed into each byte
+      const byteIndex = Math.floor(index / 8);
+      const bitIndex = index % 8;
+      const byte = data.getUint8(byteIndex);
+      // Extract the specific bit (MSB first - standard TIFF bit order)
+      return (byte >> (7 - bitIndex)) & 1;
+    } else if (bitDepth === 8) {
       return data.getUint8(index);
     } else if (bitDepth === 16) {
       return data.getUint16(2 * index, littleEndian);
@@ -431,7 +438,9 @@ function getDataArray(
   bitDepth: number,
   sampleFormat: number,
 ): DataArray {
-  if (bitDepth === 8) {
+  if (bitDepth === 1) {
+    return new Uint8Array(size);
+  } else if (bitDepth === 8) {
     return new Uint8Array(size);
   } else if (bitDepth === 16) {
     return new Uint16Array(size);
