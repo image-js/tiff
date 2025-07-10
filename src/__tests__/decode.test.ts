@@ -190,6 +190,22 @@ const files: TiffFile[] = [
     components: 1,
     alpha: false,
   },
+  {
+    name: 'bw1bit.tif',
+    width: 2,
+    height: 2,
+    bitsPerSample: 1,
+    components: 1,
+    alpha: false,
+  },
+  {
+    name: 'bwCross.tif',
+    width: 10,
+    height: 10,
+    bitsPerSample: 1,
+    components: 1,
+    alpha: false,
+  },
 ];
 const cases = files.map(
   (file) => [file.name, file, readImage(file.name)] as const,
@@ -208,7 +224,11 @@ test.each(cases)(
     expect(height).toBe(file.height);
     expect(components).toBe(file.components);
     expect(bitsPerSample).toBe(file.bitsPerSample);
-    expect(data).toHaveLength(file.width * file.height * file.components);
+    const size =
+      bitsPerSample === 1
+        ? Math.ceil((file.width * file.components) / 8) * file.height
+        : file.width * file.height * file.components;
+    expect(data).toHaveLength(size);
     expect(alpha).toBe(Boolean(file.alpha));
   },
 );
@@ -334,4 +354,35 @@ test('should decode image compressed with deflate algorithm', () => {
     width: 128,
     height: 128,
   });
+});
+test('should decode basic 2x2 1-bit image ', () => {
+  const decoded = decode(readImage('bw1bit.tif'));
+  expect(decoded).toHaveLength(1);
+  expect(decoded[0]).toMatchObject({
+    alpha: false,
+    bitsPerSample: 1,
+    components: 1,
+    compression: 1,
+    width: 2,
+    height: 2,
+  });
+  expect(decoded[0].data).toEqual(new Uint8Array([191, 127]));
+});
+test('should decode 10x10 1-bit image as a cross', () => {
+  const decoded = decode(readImage('bwCross.tif'));
+  expect(decoded).toHaveLength(1);
+  expect(decoded[0]).toMatchObject({
+    alpha: false,
+    bitsPerSample: 1,
+    components: 1,
+    compression: 1,
+    width: 10,
+    height: 10,
+  });
+  expect(decoded[0].data).toEqual(
+    new Uint8Array([
+      12, 63, 12, 63, 12, 63, 12, 63, 255, 255, 255, 255, 12, 63, 12, 63, 12,
+      63, 12, 63,
+    ]),
+  );
 });
