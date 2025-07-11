@@ -317,18 +317,19 @@ export default class TIFFDecoder extends IOBuffer {
     if (!ifd.tileWidth || !ifd.tileHeight) {
       return;
     }
-    // General Image Dimensions
+
     const width = ifd.width;
     const height = ifd.height;
-    const size = width * height * ifd.samplesPerPixel;
+    const size =
+      ifd.bitsPerSample === 1
+        ? Math.ceil((width * ifd.samplesPerPixel) / 8) * height
+        : width * height * ifd.samplesPerPixel;
 
-    // Tile Dimensions, Counts
     const twidth = ifd.tileWidth;
     const theight = ifd.tileHeight;
-    const nwidth = Math.floor((width + twidth - 1) / twidth);
-    const nheight = Math.floor((height + theight - 1) / theight);
+    const nwidth = Math.ceil(width / twidth);
+    const nheight = Math.ceil(height / theight);
 
-    // Compressed Tile Layout
     const tileOffsets = ifd.tileOffsets;
     const tileByteCounts = ifd.tileByteCounts;
     const littleEndian = this.isLittleEndian();
@@ -337,36 +338,55 @@ export default class TIFFDecoder extends IOBuffer {
       ifd.bitsPerSample,
       littleEndian,
     );
-    // Output Data Buffer
+
     const output = getDataArray(size, ifd.bitsPerSample, ifd.sampleFormat);
 
-    // Iterate over Set of Tiles
-    for (let nx = 0; nx < nwidth; ++nx) {
-      for (let ny = 0; ny < nheight; ++ny) {
-        // Note: TIFF Orders Tiles Row-Major,
-        //  including the tile interiors.
+    for (let ny = 0; ny < nheight; ++ny) {
+      for (let nx = 0; nx < nwidth; ++nx) {
         const nind = ny * nwidth + nx;
 
-        // Extract and Decompress Tile Data
         const tileData = new DataView(
           this.buffer,
           tileOffsets[nind],
           tileByteCounts[nind],
         );
+
         const uncompressed = TIFFDecoder.uncompress(tileData, ifd.compression);
 
-        // Write Uncompressed Tile Data to Output
-        for (let tx = 0; tx < twidth; ++tx) {
-          for (let ty = 0; ty < theight; ++ty) {
-            const ix = nx * twidth + tx;
+        if (ifd.bitsPerSample === 1) {
+          // For 1-bit: read sequentially by bytes
+          const bytesPerRow = Math.ceil(width / 8);
+          let tileByteIndex = 0;
+
+          for (let ty = 0; ty < theight && ny * theight + ty < height; ty++) {
             const iy = ny * theight + ty;
-            if (ix >= width || iy >= height) continue;
+            const rowStartByte = Math.floor((nx * twidth) / 8);
+            const bytesInThisRow = Math.ceil(
+              Math.min(width - nx * twidth, twidth) / 8,
+            );
 
-            const index = ty * twidth + tx;
-            const value = readSamples(uncompressed, index);
+            for (let b = 0; b < bytesInThisRow; b++) {
+              const value = readSamples(uncompressed, tileByteIndex);
+              const outputByteIndex = iy * bytesPerRow + rowStartByte + b;
+              output[outputByteIndex] = value;
+              tileByteIndex++;
+            }
+          }
+        } else {
+          // For 8/16/32-bit: read by pixels
+          for (let ty = 0; ty < theight; ty++) {
+            for (let tx = 0; tx < twidth; tx++) {
+              const ix = nx * twidth + tx;
+              const iy = ny * theight + ty;
 
-            const indexOut = (iy * width + ix) * ifd.samplesPerPixel;
-            output[indexOut] = value;
+              if (ix >= width || iy >= height) continue;
+
+              const tilePixelIndex = ty * twidth + tx;
+              const value = readSamples(uncompressed, tilePixelIndex);
+
+              const outputPixelIndex = (iy * width + ix) * ifd.samplesPerPixel;
+              output[outputPixelIndex] = value;
+            }
           }
         }
       }
