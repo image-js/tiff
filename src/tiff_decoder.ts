@@ -347,7 +347,7 @@ export default class TIFFDecoder extends IOBuffer {
 
         const tileData = new DataView(
           this.buffer,
-          tileOffsets[nind],
+          this.byteOffset + tileOffsets[nind],
           tileByteCounts[nind],
         );
 
