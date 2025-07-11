@@ -386,3 +386,21 @@ test('should decode 10x10 1-bit image as a cross', () => {
     ]),
   );
 });
+test('should decode 15x15 image with tile data', () => {
+  const decoded = decode(readImage('crosshair_tiled.tif'));
+  expect(decoded).toHaveLength(1);
+  expect(decoded[0]).toMatchObject({
+    alpha: false,
+    bitsPerSample: 1,
+    components: 1,
+    compression: 1,
+    width: 15,
+    height: 15,
+  });
+  expect(decoded[0].data).toEqual(
+    new Uint8Array([
+      7, 192, 7, 192, 7, 192, 7, 192, 0, 0, 240, 30, 243, 158, 243, 158, 243,
+      158, 240, 30, 0, 0, 7, 192, 7, 192, 7, 192, 7, 192,
+    ]),
+  );
+});
