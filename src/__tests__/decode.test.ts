@@ -190,6 +190,7 @@ const files: TiffFile[] = [
     components: 1,
     alpha: false,
   },
+
   {
     name: 'bw1bit.tif',
     width: 2,
@@ -224,10 +225,7 @@ test.each(cases)(
     expect(height).toBe(file.height);
     expect(components).toBe(file.components);
     expect(bitsPerSample).toBe(file.bitsPerSample);
-    const size =
-      bitsPerSample === 1
-        ? Math.ceil((file.width * file.components) / 8) * file.height
-        : file.width * file.height * file.components;
+    const size = file.width * file.height * file.components;
     expect(data).toHaveLength(size);
     expect(alpha).toBe(Boolean(file.alpha));
   },
@@ -366,7 +364,7 @@ test('should decode basic 2x2 1-bit image ', () => {
     width: 2,
     height: 2,
   });
-  expect(decoded[0].data).toEqual(new Uint8Array([191, 127]));
+  expect(decoded[0].data).toEqual(new Uint8Array([1, 0, 0, 1]));
 });
 test('should decode 10x10 1-bit image as a cross', () => {
   const decoded = decode(readImage('bwCross.tif'));
@@ -380,10 +378,20 @@ test('should decode 10x10 1-bit image as a cross', () => {
     height: 10,
   });
   expect(decoded[0].data).toEqual(
-    new Uint8Array([
-      12, 63, 12, 63, 12, 63, 12, 63, 255, 255, 255, 255, 12, 63, 12, 63, 12,
-      63, 12, 63,
-    ]),
+    new Uint8Array(
+      [
+        [0, 0, 0, 0, 1, 1, 0, 0, 0, 0],
+        [0, 0, 0, 0, 1, 1, 0, 0, 0, 0],
+        [0, 0, 0, 0, 1, 1, 0, 0, 0, 0],
+        [0, 0, 0, 0, 1, 1, 0, 0, 0, 0],
+        [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+        [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+        [0, 0, 0, 0, 1, 1, 0, 0, 0, 0],
+        [0, 0, 0, 0, 1, 1, 0, 0, 0, 0],
+        [0, 0, 0, 0, 1, 1, 0, 0, 0, 0],
+        [0, 0, 0, 0, 1, 1, 0, 0, 0, 0],
+      ].flat(),
+    ),
   );
 });
 test('should decode 15x15 image with tile data', () => {
@@ -398,9 +406,24 @@ test('should decode 15x15 image with tile data', () => {
     height: 15,
   });
   expect(decoded[0].data).toEqual(
-    new Uint8Array([
-      7, 192, 7, 192, 7, 192, 7, 192, 0, 0, 240, 30, 243, 158, 243, 158, 243,
-      158, 240, 30, 0, 0, 7, 192, 7, 192, 7, 192, 7, 192,
-    ]),
+    new Uint8Array(
+      [
+        [0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1],
+        [1, 1, 1, 1, 0, 0, 1, 1, 1, 0, 0, 1, 1, 1, 1],
+        [1, 1, 1, 1, 0, 0, 1, 1, 1, 0, 0, 1, 1, 1, 1],
+        [1, 1, 1, 1, 0, 0, 1, 1, 1, 0, 0, 1, 1, 1, 1],
+        [1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0],
+      ].flat(),
+    ),
   );
 });

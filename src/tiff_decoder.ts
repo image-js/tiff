@@ -203,18 +203,43 @@ export default class TIFFDecoder extends IOBuffer {
       default:
         throw unsupported('image type', ifd.type);
     }
+
     this.applyPredictor(ifd);
     this.convertAlpha(ifd);
+    if (ifd.bitsPerSample === 1) {
+      this.split1BitData(ifd);
+    }
     if (ifd.type === 0) {
       // WhiteIsZero: we invert the values
       const bitDepth = ifd.bitsPerSample;
-      const maxValue = bitDepth !== 1 ? 2 ** bitDepth - 1 : 255;
+      const maxValue = 2 ** bitDepth - 1;
       for (let i = 0; i < ifd.data.length; i++) {
         ifd.data[i] = maxValue - ifd.data[i];
       }
     }
   }
 
+  private split1BitData(ifd: TiffIfd) {
+    const { imageWidth, imageLength, samplesPerPixel } = ifd;
+    const data = new Uint8Array(imageLength * imageWidth * samplesPerPixel);
+
+    const bytesPerRow = Math.ceil(imageWidth / 8);
+    let dataIndex = 0;
+
+    for (let row = 0; row < imageLength; row++) {
+      const rowStartByte = row * bytesPerRow;
+
+      for (let col = 0; col < imageWidth; col++) {
+        const byteIndex = rowStartByte + Math.floor(col / 8);
+        const bitIndex = 7 - (col % 8);
+        const bit = (ifd.data[byteIndex] >> bitIndex) & 1;
+
+        data[dataIndex++] = bit;
+      }
+    }
+
+    ifd.data = data;
+  }
   private static uncompress(data: DataView, compression = 1): DataView {
     switch (compression) {
       // No compression, nothing to do
