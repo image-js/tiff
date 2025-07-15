@@ -269,9 +269,7 @@ export default class TIFFDecoder extends IOBuffer {
     bitDepth: number,
     littleEndian: boolean,
   ): (data: DataView, index: number) => number {
-    if (bitDepth === 1) {
-      return (data: DataView, index: number) => data.getUint8(index);
-    } else if (bitDepth === 8) {
+    if (bitDepth === 8 || bitDepth === 1) {
       return (data: DataView, index: number) => data.getUint8(index);
     } else if (bitDepth === 16) {
       return (data: DataView, index: number) =>
@@ -292,18 +290,18 @@ export default class TIFFDecoder extends IOBuffer {
     const width = ifd.width;
     const height = ifd.height;
     const size =
-      ifd.bitsPerSample === 1
-        ? Math.ceil((width * ifd.samplesPerPixel) / 8) * height
-        : width * ifd.samplesPerPixel * height;
+      ifd.bitsPerSample !== 1
+        ? width * ifd.samplesPerPixel * height
+        : Math.ceil((width * ifd.samplesPerPixel) / 8) * height;
     // Compressed Strip Layout
     const stripOffsets = ifd.stripOffsets;
     const stripByteCounts = ifd.stripByteCounts || guessStripByteCounts(ifd);
     const littleEndian = this.isLittleEndian();
     // For 1-bit images, calculate pixels per strip correctly
     const stripLength =
-      ifd.bitsPerSample === 1
-        ? Math.ceil((width * ifd.samplesPerPixel) / 8) * ifd.rowsPerStrip
-        : width * ifd.samplesPerPixel * ifd.rowsPerStrip;
+      ifd.bitsPerSample !== 1
+        ? width * ifd.samplesPerPixel * ifd.rowsPerStrip
+        : Math.ceil((width * ifd.samplesPerPixel) / 8) * ifd.rowsPerStrip;
     const readSamples = this.createSampleReader(
       ifd.sampleFormat,
       ifd.bitsPerSample,
@@ -346,9 +344,9 @@ export default class TIFFDecoder extends IOBuffer {
     const width = ifd.width;
     const height = ifd.height;
     const size =
-      ifd.bitsPerSample === 1
-        ? Math.ceil((width * ifd.samplesPerPixel) / 8) * height
-        : width * height * ifd.samplesPerPixel;
+      ifd.bitsPerSample !== 1
+        ? width * height * ifd.samplesPerPixel
+        : Math.ceil((width * ifd.samplesPerPixel) / 8) * height;
 
     const twidth = ifd.tileWidth;
     const theight = ifd.tileHeight;
@@ -365,9 +363,8 @@ export default class TIFFDecoder extends IOBuffer {
     );
 
     const output = getDataArray(size, ifd.bitsPerSample, ifd.sampleFormat);
-
-    for (let ny = 0; ny < nheight; ++ny) {
-      for (let nx = 0; nx < nwidth; ++nx) {
+    for (let nx = 0; nx < nwidth; ++nx) {
+      for (let ny = 0; ny < nheight; ++ny) {
         const nind = ny * nwidth + nx;
 
         const tileData = new DataView(
@@ -381,20 +378,19 @@ export default class TIFFDecoder extends IOBuffer {
         if (ifd.bitsPerSample === 1) {
           // For 1-bit: read sequentially by bytes
           const bytesPerRow = Math.ceil(width / 8);
-          let tileByteIndex = 0;
+          const tileBytesPerRow = Math.ceil(twidth / 8);
 
           for (let ty = 0; ty < theight && ny * theight + ty < height; ty++) {
             const iy = ny * theight + ty;
-            const rowStartByte = Math.floor((nx * twidth) / 8);
-            const bytesInThisRow = Math.ceil(
-              Math.min(width - nx * twidth, twidth) / 8,
+            const srcStart = ty * tileBytesPerRow;
+            const dstStart = iy * bytesPerRow + Math.floor((nx * twidth) / 8);
+            // Copy the row of bytes from tile to output
+            const bytesToCopy = Math.min(
+              tileBytesPerRow,
+              bytesPerRow - Math.floor((nx * twidth) / 8),
             );
-
-            for (let b = 0; b < bytesInThisRow; b++) {
-              const value = readSamples(uncompressed, tileByteIndex);
-              const outputByteIndex = iy * bytesPerRow + rowStartByte + b;
-              output[outputByteIndex] = value;
-              tileByteIndex++;
+            for (let b = 0; b < bytesToCopy; b++) {
+              output[dstStart + b] = readSamples(uncompressed, srcStart + b);
             }
           }
         } else {
@@ -470,9 +466,7 @@ function getDataArray(
   bitDepth: number,
   sampleFormat: number,
 ): DataArray {
-  if (bitDepth === 1) {
-    return new Uint8Array(size);
-  } else if (bitDepth === 8) {
+  if (bitDepth === 8 || bitDepth === 1) {
     return new Uint8Array(size);
   } else if (bitDepth === 16) {
     return new Uint16Array(size);
