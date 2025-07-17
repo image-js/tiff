@@ -223,13 +223,13 @@ export default class TIFFDecoder extends IOBuffer {
     const { imageWidth, imageLength, samplesPerPixel } = ifd;
     const data = new Uint8Array(imageLength * imageWidth * samplesPerPixel);
 
-    const bytesPerRow = Math.ceil(imageWidth / 8);
+    const bytesPerRow = Math.ceil((imageWidth * samplesPerPixel) / 8);
     let dataIndex = 0;
 
     for (let row = 0; row < imageLength; row++) {
       const rowStartByte = row * bytesPerRow;
 
-      for (let col = 0; col < imageWidth; col++) {
+      for (let col = 0; col < imageWidth * samplesPerPixel; col++) {
         const byteIndex = rowStartByte + Math.floor(col / 8);
         const bitIndex = 7 - (col % 8);
         const bit = (ifd.data[byteIndex] >> bitIndex) & 1;
