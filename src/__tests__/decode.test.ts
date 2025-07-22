@@ -219,7 +219,7 @@ const files: TiffFile[] = [
   },
 ];
 const cases = files.map(
-  (file) => [file.name, file, readImage(file.name), file.pages] as const,
+  (file) => [file.name, file, readImage(file.name)] as const,
 );
 
 const stack = readImage('stack.tif');
@@ -438,7 +438,7 @@ test('should decode 15x15 image with tile data', () => {
     ),
   );
 });
-/*
+
 test('should decode multiframe image', () => {
   const decoded = decode(readImage('dog.tiff'));
   expect(decoded).toHaveLength(8);
@@ -469,4 +469,4 @@ test('should decode multiframe image', () => {
   ]);
   expect(decoded[1].samplesPerPixel).toEqual(2);
   expect(decoded[1].data.slice(352, 384)).toEqual(secondFrameTwelvethRow);
-});*/
+});
