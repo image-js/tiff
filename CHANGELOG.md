@@ -1,5 +1,17 @@
 # Changelog
 
+## [7.1.0](https://github.com/image-js/tiff/compare/v7.0.0...v7.1.0) (2025-07-23)
+
+
+### Features
+
+* add support for 1 bit depth bw files ([#73](https://github.com/image-js/tiff/issues/73)) ([f101c2b](https://github.com/image-js/tiff/commit/f101c2b477c92fd2c4542b5a2452ed4cc5361a65))
+
+
+### Performance Improvements
+
+* improve performance of data decoding ([#70](https://github.com/image-js/tiff/issues/70)) ([be54e07](https://github.com/image-js/tiff/commit/be54e0790216b87b269dbcfe4671c48ac512d465))
+
 ## [7.0.0](https://github.com/image-js/tiff/compare/v6.2.0...v7.0.0) (2025-06-15)
 
 
