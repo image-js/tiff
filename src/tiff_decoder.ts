@@ -203,8 +203,12 @@ export default class TIFFDecoder extends IOBuffer {
       default:
         throw unsupported('image type', ifd.type);
     }
+
     this.applyPredictor(ifd);
     this.convertAlpha(ifd);
+    if (ifd.bitsPerSample === 1) {
+      this.split1BitData(ifd);
+    }
     if (ifd.type === 0) {
       // WhiteIsZero: we invert the values
       const bitDepth = ifd.bitsPerSample;
@@ -215,6 +219,27 @@ export default class TIFFDecoder extends IOBuffer {
     }
   }
 
+  private split1BitData(ifd: TiffIfd) {
+    const { imageWidth, imageLength, samplesPerPixel } = ifd;
+    const data = new Uint8Array(imageLength * imageWidth * samplesPerPixel);
+
+    const bytesPerRow = Math.ceil((imageWidth * samplesPerPixel) / 8);
+    let dataIndex = 0;
+
+    for (let row = 0; row < imageLength; row++) {
+      const rowStartByte = row * bytesPerRow;
+
+      for (let col = 0; col < imageWidth * samplesPerPixel; col++) {
+        const byteIndex = rowStartByte + Math.floor(col / 8);
+        const bitIndex = 7 - (col % 8);
+        const bit = (ifd.data[byteIndex] >> bitIndex) & 1;
+
+        data[dataIndex++] = bit;
+      }
+    }
+
+    ifd.data = data;
+  }
   private static uncompress(data: DataView, compression = 1): DataView {
     switch (compression) {
       // No compression, nothing to do
@@ -244,7 +269,7 @@ export default class TIFFDecoder extends IOBuffer {
     bitDepth: number,
     littleEndian: boolean,
   ): (data: DataView, index: number) => number {
-    if (bitDepth === 8) {
+    if (bitDepth === 8 || bitDepth === 1) {
       return (data: DataView, index: number) => data.getUint8(index);
     } else if (bitDepth === 16) {
       return (data: DataView, index: number) =>
@@ -264,14 +289,19 @@ export default class TIFFDecoder extends IOBuffer {
     // General Image Dimensions
     const width = ifd.width;
     const height = ifd.height;
-    const size = width * height * ifd.samplesPerPixel;
-
+    const size =
+      ifd.bitsPerSample !== 1
+        ? width * ifd.samplesPerPixel * height
+        : Math.ceil((width * ifd.samplesPerPixel) / 8) * height;
     // Compressed Strip Layout
-    // Note: Strips are Row-Major
     const stripOffsets = ifd.stripOffsets;
     const stripByteCounts = ifd.stripByteCounts || guessStripByteCounts(ifd);
     const littleEndian = this.isLittleEndian();
-    const stripLength = width * ifd.rowsPerStrip * ifd.samplesPerPixel;
+    // For 1-bit images, calculate pixels per strip correctly
+    const stripLength =
+      ifd.bitsPerSample !== 1
+        ? width * ifd.samplesPerPixel * ifd.rowsPerStrip
+        : Math.ceil((width * ifd.samplesPerPixel) / 8) * ifd.rowsPerStrip;
     const readSamples = this.createSampleReader(
       ifd.sampleFormat,
       ifd.bitsPerSample,
@@ -279,7 +309,6 @@ export default class TIFFDecoder extends IOBuffer {
     );
     // Output Data Buffer
     const output = getDataArray(size, ifd.bitsPerSample, ifd.sampleFormat);
-
     // Iterate over Number of Strips
     let start = 0;
     for (let i = 0; i < stripOffsets.length; i++) {
@@ -304,6 +333,7 @@ export default class TIFFDecoder extends IOBuffer {
     }
 
     ifd.data = output;
+    // For 1-bit images, we need to convert the data to bits
   }
 
   private readTileData(ifd: TiffIfd): void {
@@ -311,18 +341,18 @@ export default class TIFFDecoder extends IOBuffer {
       return;
     }
 
-    // General Image Dimensions
     const width = ifd.width;
     const height = ifd.height;
-    const size = width * height * ifd.samplesPerPixel;
+    const size =
+      ifd.bitsPerSample !== 1
+        ? width * height * ifd.samplesPerPixel
+        : Math.ceil((width * ifd.samplesPerPixel) / 8) * height;
 
-    // Tile Dimensions, Counts
     const twidth = ifd.tileWidth;
     const theight = ifd.tileHeight;
-    const nwidth = Math.floor((width + twidth - 1) / twidth);
-    const nheight = Math.floor((height + theight - 1) / theight);
+    const nwidth = Math.ceil(width / twidth);
+    const nheight = Math.ceil(height / theight);
 
-    // Compressed Tile Layout
     const tileOffsets = ifd.tileOffsets;
     const tileByteCounts = ifd.tileByteCounts;
     const littleEndian = this.isLittleEndian();
@@ -331,37 +361,53 @@ export default class TIFFDecoder extends IOBuffer {
       ifd.bitsPerSample,
       littleEndian,
     );
-    // Output Data Buffer
-    const output = getDataArray(size, ifd.bitsPerSample, ifd.sampleFormat);
 
-    // Iterate over Set of Tiles
+    const output = getDataArray(size, ifd.bitsPerSample, ifd.sampleFormat);
     for (let nx = 0; nx < nwidth; ++nx) {
       for (let ny = 0; ny < nheight; ++ny) {
-        // Note: TIFF Orders Tiles Row-Major,
-        //  including the tile interiors.
         const nind = ny * nwidth + nx;
 
-        // Extract and Decompress Tile Data
         const tileData = new DataView(
           this.buffer,
-          tileOffsets[nind],
+          this.byteOffset + tileOffsets[nind],
           tileByteCounts[nind],
         );
+
         const uncompressed = TIFFDecoder.uncompress(tileData, ifd.compression);
 
-        // Write Uncompressed Tile Data to Output
-        for (let tx = 0; tx < twidth; ++tx) {
-          for (let ty = 0; ty < theight; ++ty) {
-            const ix = nx * twidth + tx;
+        if (ifd.bitsPerSample === 1) {
+          // For 1-bit: read sequentially by bytes
+          const bytesPerRow = Math.ceil(width / 8);
+          const tileBytesPerRow = Math.ceil(twidth / 8);
+
+          for (let ty = 0; ty < theight && ny * theight + ty < height; ty++) {
             const iy = ny * theight + ty;
-            if (ix >= width) continue;
-            if (iy >= height) continue;
+            const srcStart = ty * tileBytesPerRow;
+            const dstStart = iy * bytesPerRow + Math.floor((nx * twidth) / 8);
+            // Copy the row of bytes from tile to output
+            const bytesToCopy = Math.min(
+              tileBytesPerRow,
+              bytesPerRow - Math.floor((nx * twidth) / 8),
+            );
+            for (let b = 0; b < bytesToCopy; b++) {
+              output[dstStart + b] = readSamples(uncompressed, srcStart + b);
+            }
+          }
+        } else {
+          // For 8/16/32-bit: read by pixels
+          for (let ty = 0; ty < theight; ty++) {
+            for (let tx = 0; tx < twidth; tx++) {
+              const ix = nx * twidth + tx;
+              const iy = ny * theight + ty;
 
-            const index = ty * twidth + tx;
-            const value = readSamples(uncompressed, index);
+              if (ix >= width || iy >= height) continue;
 
-            const indexOut = iy * width + ix;
-            output[indexOut] = value;
+              const tilePixelIndex = ty * twidth + tx;
+              const value = readSamples(uncompressed, tilePixelIndex);
+
+              const outputPixelIndex = (iy * width + ix) * ifd.samplesPerPixel;
+              output[outputPixelIndex] = value;
+            }
           }
         }
       }
@@ -420,7 +466,7 @@ function getDataArray(
   bitDepth: number,
   sampleFormat: number,
 ): DataArray {
-  if (bitDepth === 8) {
+  if (bitDepth === 8 || bitDepth === 1) {
     return new Uint8Array(size);
   } else if (bitDepth === 16) {
     return new Uint16Array(size);

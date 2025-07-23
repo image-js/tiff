@@ -16,6 +16,7 @@ interface TiffFile {
   bitsPerSample: number;
   components: number;
   alpha?: boolean;
+  pages?: number;
 }
 
 const files: TiffFile[] = [
@@ -190,6 +191,32 @@ const files: TiffFile[] = [
     components: 1,
     alpha: false,
   },
+  {
+    name: 'bw1bit.tif',
+    width: 2,
+    height: 2,
+    bitsPerSample: 1,
+    components: 1,
+    alpha: false,
+  },
+  {
+    name: 'bwCross.tif',
+    width: 10,
+    height: 10,
+    bitsPerSample: 1,
+    components: 1,
+    alpha: false,
+  },
+  // Checks only the first frame of the image.
+  {
+    name: 'dog.tiff',
+    width: 16,
+    height: 16,
+    bitsPerSample: 1,
+    components: 4,
+    alpha: true,
+    pages: 8,
+  },
 ];
 const cases = files.map(
   (file) => [file.name, file, readImage(file.name)] as const,
@@ -202,13 +229,15 @@ test.each(cases)(
   { timeout: 30_000 },
   (name, file, image) => {
     const result = decode(image);
-    expect(result).toHaveLength(1);
+
+    expect(result).toHaveLength(file.pages ?? 1);
     const { data, bitsPerSample, width, height, components, alpha } = result[0];
     expect(width).toBe(file.width);
     expect(height).toBe(file.height);
     expect(components).toBe(file.components);
     expect(bitsPerSample).toBe(file.bitsPerSample);
-    expect(data).toHaveLength(file.width * file.height * file.components);
+    const size = file.width * file.height * file.components;
+    expect(data).toHaveLength(size);
     expect(alpha).toBe(Boolean(file.alpha));
   },
 );
@@ -334,4 +363,110 @@ test('should decode image compressed with deflate algorithm', () => {
     width: 128,
     height: 128,
   });
+});
+test('should decode basic 2x2 1-bit image ', () => {
+  const decoded = decode(readImage('bw1bit.tif'));
+  expect(decoded).toHaveLength(1);
+  expect(decoded[0]).toMatchObject({
+    alpha: false,
+    bitsPerSample: 1,
+    components: 1,
+    compression: 1,
+    width: 2,
+    height: 2,
+  });
+  expect(decoded[0].data).toEqual(new Uint8Array([1, 0, 0, 1]));
+});
+test('should decode 10x10 1-bit image as a cross', () => {
+  const decoded = decode(readImage('bwCross.tif'));
+  expect(decoded).toHaveLength(1);
+  expect(decoded[0]).toMatchObject({
+    alpha: false,
+    bitsPerSample: 1,
+    components: 1,
+    compression: 1,
+    width: 10,
+    height: 10,
+  });
+  expect(decoded[0].data).toEqual(
+    new Uint8Array(
+      [
+        [0, 0, 0, 0, 1, 1, 0, 0, 0, 0],
+        [0, 0, 0, 0, 1, 1, 0, 0, 0, 0],
+        [0, 0, 0, 0, 1, 1, 0, 0, 0, 0],
+        [0, 0, 0, 0, 1, 1, 0, 0, 0, 0],
+        [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+        [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+        [0, 0, 0, 0, 1, 1, 0, 0, 0, 0],
+        [0, 0, 0, 0, 1, 1, 0, 0, 0, 0],
+        [0, 0, 0, 0, 1, 1, 0, 0, 0, 0],
+        [0, 0, 0, 0, 1, 1, 0, 0, 0, 0],
+      ].flat(),
+    ),
+  );
+});
+test('should decode 15x15 image with tile data', () => {
+  const decoded = decode(readImage('crosshair_tiled.tif'));
+  expect(decoded).toHaveLength(1);
+  expect(decoded[0]).toMatchObject({
+    alpha: false,
+    bitsPerSample: 1,
+    components: 1,
+    compression: 1,
+    width: 15,
+    height: 15,
+  });
+  expect(decoded[0].data).toEqual(
+    new Uint8Array(
+      [
+        [0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1],
+        [1, 1, 1, 1, 0, 0, 1, 1, 1, 0, 0, 1, 1, 1, 1],
+        [1, 1, 1, 1, 0, 0, 1, 1, 1, 0, 0, 1, 1, 1, 1],
+        [1, 1, 1, 1, 0, 0, 1, 1, 1, 0, 0, 1, 1, 1, 1],
+        [1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0],
+      ].flat(),
+    ),
+  );
+});
+
+test('should decode multiframe image', () => {
+  const decoded = decode(readImage('dog.tiff'));
+  expect(decoded).toHaveLength(8);
+  expect(decoded[0]).toMatchObject({
+    alpha: true,
+    bitsPerSample: 1,
+    components: 4,
+    compression: 1,
+    width: 16,
+    height: 16,
+  });
+
+  expect(decoded[0].imageWidth).toEqual(16);
+  // last row of the first frame
+  const firstFrameLastRow = new Uint8Array([
+    1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 1,
+    1, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1,
+    0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0,
+  ]);
+  expect(decoded[1].imageLength).toEqual(16);
+  expect(decoded[1].imageWidth).toEqual(16);
+
+  expect(decoded[0].data.slice(960, 1024)).toEqual(firstFrameLastRow);
+  // twelveth row of the second frame
+  const secondFrameTwelvethRow = new Uint8Array([
+    1, 0, 1, 1, 1, 0, 1, 0, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 0, 1,
+    0, 1, 0, 1, 0, 1, 0,
+  ]);
+  expect(decoded[1].samplesPerPixel).toEqual(2);
+  expect(decoded[1].data.slice(352, 384)).toEqual(secondFrameTwelvethRow);
 });
