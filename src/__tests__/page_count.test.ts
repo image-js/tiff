@@ -23,6 +23,7 @@ const contents = files.map((file) =>
 test('TIFF pageCount', () => {
   for (let i = 0; i < contents.length; i++) {
     const result = pageCount(contents[i]);
+
     expect(result).toBe(files[i].pages);
   }
 });

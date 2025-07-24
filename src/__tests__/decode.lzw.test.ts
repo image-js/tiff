@@ -18,6 +18,7 @@ describe('decode lzw', () => {
       join(import.meta.dirname, '../../img/image.tif'),
     );
     const image = decode(buffer);
+
     expect(
       dataEqual(imageLzw[0].data as Uint8Array, image[0].data as Uint8Array),
     ).toBe(true);
@@ -32,6 +33,7 @@ describe('decode lzw', () => {
       join(import.meta.dirname, '../../img/color8.tif'),
     );
     const image = decode(buffer);
+
     expect(
       dataEqual(imageLzw[0].data as Uint8Array, image[0].data as Uint8Array),
     ).toBe(true);
