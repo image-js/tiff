@@ -231,12 +231,16 @@ test.each(cases)(
     const result = decode(image);
 
     expect(result).toHaveLength(file.pages ?? 1);
+
     const { data, bitsPerSample, width, height, components, alpha } = result[0];
+
     expect(width).toBe(file.width);
     expect(height).toBe(file.height);
     expect(components).toBe(file.components);
     expect(bitsPerSample).toBe(file.bitsPerSample);
+
     const size = file.width * file.height * file.components;
+
     expect(data).toHaveLength(size);
     expect(alpha).toBe(Boolean(file.alpha));
   },
@@ -253,11 +257,13 @@ const expectedRgb8BitData = Uint8Array.from([
 
 test('should decode RGB 8bit data', () => {
   const [result] = decode(readImage('color-5x5.tif'));
+
   expect(result.data).toStrictEqual(expectedRgb8BitData);
 });
 
 test('should decode RGB 8bit data with LZW compression', () => {
   const [result] = decode(readImage('color-5x5-lzw.tif'));
+
   expect(result.data).toStrictEqual(expectedRgb8BitData);
 });
 
@@ -272,11 +278,13 @@ const expectedRgb8BitAlphaData = Uint8Array.from([
 
 test('should decode RGB 8bit data with pre-multiplied alpha', () => {
   const [result] = decode(readImage('color-alpha-5x5.tif'));
+
   expect(result.data).toStrictEqual(expectedRgb8BitAlphaData);
 });
 
 test('should decode RGB 8bit data with pre-multiplied alpha and LZW compression', () => {
   const [result] = decode(readImage('color-alpha-5x5-lzw.tif'));
+
   expect(result.data).toStrictEqual(expectedRgb8BitAlphaData);
 });
 
@@ -287,16 +295,19 @@ test('should decode RGB 8bit data with pre-multiplied alpha and lost precision',
     128, 0, 0, 6, 128, 0, 0, 6,
   ]);
   const [result] = decode(readImage('color-alpha-2x2.tif'));
+
   expect(result.data).toStrictEqual(expectedData);
 });
 
 test('should decode with onlyFirst', () => {
   const result = decode(readImage('grey8.tif'), { pages: [0] });
+
   expect(result[0]).toHaveProperty('data');
 });
 
 test('should omit data', () => {
   const result = decode(readImage('grey8.tif'), { ignoreImageData: true });
+
   expect(result[0].data).toStrictEqual(new Uint8Array());
 });
 
@@ -305,6 +316,7 @@ test('should read exif data', () => {
     pages: [0],
     ignoreImageData: true,
   });
+
   // @ts-expect-error We know exif is defined.
   expect(result[0].exif.map).toStrictEqual({
     ColorSpace: 65535,
@@ -315,7 +327,9 @@ test('should read exif data', () => {
 
 test('should decode stacks', () => {
   const decoded = decode(stack);
+
   expect(decoded).toHaveLength(10);
+
   for (const image of decoded) {
     expect(image.width).toBe(128);
     expect(image.height).toBe(128);
@@ -324,7 +338,9 @@ test('should decode stacks', () => {
 
 test('specify pages to decode', () => {
   const decoded = decode(stack, { pages: [0, 2, 4, 6, 8] });
+
   expect(decoded).toHaveLength(5);
+
   for (const image of decoded) {
     expect(image.width).toBe(128);
     expect(image.height).toBe(128);
@@ -345,8 +361,11 @@ test('should throw if pages invalid', () => {
 
 test('should decode palette', () => {
   const decoded = decode(readImage('palette.tif'));
+
   expect(decoded).toHaveLength(1);
+
   const { palette } = decoded[0];
+
   expect(palette).toHaveLength(256);
   // @ts-expect-error We know palette is defined.
   expect(palette[0]).toStrictEqual([65535, 0, 0]);
@@ -354,6 +373,7 @@ test('should decode palette', () => {
 
 test('should decode image compressed with deflate algorithm', () => {
   const decoded = decode(readImage('tile_rgb_deflate.tif'));
+
   expect(decoded).toHaveLength(1);
   expect(decoded[0]).toMatchObject({
     alpha: false,
@@ -364,8 +384,10 @@ test('should decode image compressed with deflate algorithm', () => {
     height: 128,
   });
 });
+
 test('should decode basic 2x2 1-bit image ', () => {
   const decoded = decode(readImage('bw1bit.tif'));
+
   expect(decoded).toHaveLength(1);
   expect(decoded[0]).toMatchObject({
     alpha: false,
@@ -375,10 +397,12 @@ test('should decode basic 2x2 1-bit image ', () => {
     width: 2,
     height: 2,
   });
-  expect(decoded[0].data).toEqual(new Uint8Array([1, 0, 0, 1]));
+  expect(decoded[0].data).toStrictEqual(new Uint8Array([1, 0, 0, 1]));
 });
+
 test('should decode 10x10 1-bit image as a cross', () => {
   const decoded = decode(readImage('bwCross.tif'));
+
   expect(decoded).toHaveLength(1);
   expect(decoded[0]).toMatchObject({
     alpha: false,
@@ -388,7 +412,7 @@ test('should decode 10x10 1-bit image as a cross', () => {
     width: 10,
     height: 10,
   });
-  expect(decoded[0].data).toEqual(
+  expect(decoded[0].data).toStrictEqual(
     new Uint8Array(
       [
         [0, 0, 0, 0, 1, 1, 0, 0, 0, 0],
@@ -405,8 +429,10 @@ test('should decode 10x10 1-bit image as a cross', () => {
     ),
   );
 });
+
 test('should decode 15x15 image with tile data', () => {
   const decoded = decode(readImage('crosshair_tiled.tif'));
+
   expect(decoded).toHaveLength(1);
   expect(decoded[0]).toMatchObject({
     alpha: false,
@@ -416,7 +442,7 @@ test('should decode 15x15 image with tile data', () => {
     width: 15,
     height: 15,
   });
-  expect(decoded[0].data).toEqual(
+  expect(decoded[0].data).toStrictEqual(
     new Uint8Array(
       [
         [0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0],
@@ -441,6 +467,7 @@ test('should decode 15x15 image with tile data', () => {
 
 test('should decode multiframe image', () => {
   const decoded = decode(readImage('dog.tiff'));
+
   expect(decoded).toHaveLength(8);
   expect(decoded[0]).toMatchObject({
     alpha: true,
@@ -451,22 +478,25 @@ test('should decode multiframe image', () => {
     height: 16,
   });
 
-  expect(decoded[0].imageWidth).toEqual(16);
+  expect(decoded[0].imageWidth).toBe(16);
+
   // last row of the first frame
   const firstFrameLastRow = new Uint8Array([
     1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 1,
     1, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1,
     0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0,
   ]);
-  expect(decoded[1].imageLength).toEqual(16);
-  expect(decoded[1].imageWidth).toEqual(16);
 
-  expect(decoded[0].data.slice(960, 1024)).toEqual(firstFrameLastRow);
+  expect(decoded[1].imageLength).toBe(16);
+  expect(decoded[1].imageWidth).toBe(16);
+  expect(decoded[0].data.slice(960, 1024)).toStrictEqual(firstFrameLastRow);
+
   // twelveth row of the second frame
   const secondFrameTwelvethRow = new Uint8Array([
     1, 0, 1, 1, 1, 0, 1, 0, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 0, 1,
     0, 1, 0, 1, 0, 1, 0,
   ]);
-  expect(decoded[1].samplesPerPixel).toEqual(2);
-  expect(decoded[1].data.slice(352, 384)).toEqual(secondFrameTwelvethRow);
+
+  expect(decoded[1].samplesPerPixel).toBe(2);
+  expect(decoded[1].data.slice(352, 384)).toStrictEqual(secondFrameTwelvethRow);
 });
