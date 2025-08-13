@@ -1,5 +1,12 @@
 # Changelog
 
+## [7.1.1](https://github.com/image-js/tiff/compare/v7.1.0...v7.1.1) (2025-08-13)
+
+
+### Bug Fixes
+
+* exports ([#75](https://github.com/image-js/tiff/issues/75)) ([c1f2448](https://github.com/image-js/tiff/commit/c1f2448bf460aea86aca6b6c41414713ee5b50e4))
+
 ## [7.1.0](https://github.com/image-js/tiff/compare/v7.0.0...v7.1.0) (2025-07-23)
 
 
