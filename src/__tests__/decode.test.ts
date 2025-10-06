@@ -207,6 +207,22 @@ const files: TiffFile[] = [
     components: 1,
     alpha: false,
   },
+  {
+    name: 'jellybeans.tiff',
+    width: 256,
+    height: 256,
+    bitsPerSample: 8,
+    components: 3,
+    alpha: false,
+  },
+  {
+    name: 'female.tiff',
+    width: 256,
+    height: 256,
+    bitsPerSample: 8,
+    components: 3,
+    alpha: false,
+  },
   // Checks only the first frame of the image.
   {
     name: 'dog.tiff',
@@ -499,4 +515,18 @@ test('should decode multiframe image', () => {
 
   expect(decoded[1].samplesPerPixel).toBe(2);
   expect(decoded[1].data.slice(352, 384)).toStrictEqual(secondFrameTwelvethRow);
+});
+test('should decoded image with undefined rowsPerStrip', () => {
+  const decodedFemale = decode(readImage('female.tiff'));
+
+  expect(decodedFemale[0].rowsPerStrip).toBe(undefined);
+  expect(decodedFemale[0].data.slice(0, 10)).toStrictEqual(
+    new Uint8Array([94, 0, 115, 27, 61, 103, 26, 60, 104, 27]),
+  );
+  const decodedJellybeans = decode(readImage('jellybeans.tiff'));
+
+  expect(decodedJellybeans[0].rowsPerStrip).toBe(undefined);
+  expect(decodedJellybeans[0].data.slice(0, 10)).toStrictEqual(
+    new Uint8Array([139, 132, 90, 141, 136, 92, 142, 131, 89, 143]),
+  );
 });
