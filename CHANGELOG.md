@@ -1,5 +1,12 @@
 # Changelog
 
+## [7.1.2](https://github.com/image-js/tiff/compare/v7.1.1...v7.1.2) (2025-10-07)
+
+
+### Bug Fixes
+
+* fix bug with rowsPerStrip ([#79](https://github.com/image-js/tiff/issues/79)) ([7abbe97](https://github.com/image-js/tiff/commit/7abbe97dcba8ffcc581977c512bfeaeca000a79d))
+
 ## [7.1.1](https://github.com/image-js/tiff/compare/v7.1.0...v7.1.1) (2025-08-13)
 
 
