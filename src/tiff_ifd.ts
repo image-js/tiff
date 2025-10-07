@@ -91,7 +91,7 @@ export default class TiffIfd extends Ifd {
     return this.get('SamplesPerPixel') || 1;
   }
   public get rowsPerStrip(): number {
-    return this.get('RowsPerStrip');
+    return this.get('RowsPerStrip') || 2 ** 32 - 1;
   }
   public get stripByteCounts(): number[] {
     return alwaysArray(this.get('StripByteCounts'));

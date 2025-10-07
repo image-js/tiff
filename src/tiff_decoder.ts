@@ -289,7 +289,6 @@ export default class TIFFDecoder extends IOBuffer {
     // General Image Dimensions
     const width = ifd.width;
     const height = ifd.height;
-    const rowsPerStrip = ifd.rowsPerStrip || 2 ** 32 - 1;
     const size =
       ifd.bitsPerSample !== 1
         ? width * ifd.samplesPerPixel * height
@@ -302,8 +301,8 @@ export default class TIFFDecoder extends IOBuffer {
     // For 1-bit images, calculate pixels per strip correctly
     const stripLength =
       ifd.bitsPerSample !== 1
-        ? width * ifd.samplesPerPixel * rowsPerStrip
-        : Math.ceil((width * ifd.samplesPerPixel) / 8) * rowsPerStrip;
+        ? width * ifd.samplesPerPixel * ifd.rowsPerStrip
+        : Math.ceil((width * ifd.samplesPerPixel) / 8) * ifd.rowsPerStrip;
 
     const readSamples = this.createSampleReader(
       ifd.sampleFormat,

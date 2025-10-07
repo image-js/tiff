@@ -517,17 +517,17 @@ test('should decode multiframe image', () => {
   expect(decoded[1].data.slice(352, 384)).toStrictEqual(secondFrameTwelvethRow);
 });
 
-test('should decoded image with undefined rowsPerStrip', () => {
+test('should decode image with undefined rowsPerStrip', () => {
   const decodedFemale = decode(readImage('female.tiff'));
 
-  expect(decodedFemale[0].rowsPerStrip).toBeUndefined();
+  expect(decodedFemale[0].rowsPerStrip).toStrictEqual(2 ** 32 - 1);
   expect(decodedFemale[0].data.slice(0, 10)).toStrictEqual(
     new Uint8Array([94, 0, 115, 27, 61, 103, 26, 60, 104, 27]),
   );
 
   const decodedJellybeans = decode(readImage('jellybeans.tiff'));
 
-  expect(decodedJellybeans[0].rowsPerStrip).toBeUndefined();
+  expect(decodedJellybeans[0].rowsPerStrip).toStrictEqual(2 ** 32 - 1);
   expect(decodedJellybeans[0].data.slice(0, 10)).toStrictEqual(
     new Uint8Array([139, 132, 90, 141, 136, 92, 142, 131, 89, 143]),
   );
