@@ -293,6 +293,7 @@ export default class TIFFDecoder extends IOBuffer {
       ifd.bitsPerSample !== 1
         ? width * ifd.samplesPerPixel * height
         : Math.ceil((width * ifd.samplesPerPixel) / 8) * height;
+
     // Compressed Strip Layout
     const stripOffsets = ifd.stripOffsets;
     const stripByteCounts = ifd.stripByteCounts || guessStripByteCounts(ifd);
@@ -302,6 +303,7 @@ export default class TIFFDecoder extends IOBuffer {
       ifd.bitsPerSample !== 1
         ? width * ifd.samplesPerPixel * ifd.rowsPerStrip
         : Math.ceil((width * ifd.samplesPerPixel) / 8) * ifd.rowsPerStrip;
+
     const readSamples = this.createSampleReader(
       ifd.sampleFormat,
       ifd.bitsPerSample,
