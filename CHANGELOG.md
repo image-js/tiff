@@ -1,5 +1,12 @@
 # Changelog
 
+## [7.1.3](https://github.com/image-js/tiff/compare/v7.1.2...v7.1.3) (2025-11-25)
+
+
+### Bug Fixes
+
+* use fflate instead of pako ([#81](https://github.com/image-js/tiff/issues/81)) ([a6ea694](https://github.com/image-js/tiff/commit/a6ea694a4eef06c8d3b856f2d9dce3d3e2510a0f))
+
 ## [7.1.2](https://github.com/image-js/tiff/compare/v7.1.1...v7.1.2) (2025-10-07)
 
 

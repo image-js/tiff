@@ -1,6 +1,6 @@
 {
   "name": "tiff",
-  "version": "7.1.2",
+  "version": "7.1.3",
   "license": "MIT",
   "description": "TIFF image decoder written entirely in JavaScript",
   "author": "Michaël Zasso",
