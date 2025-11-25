@@ -1,4 +1,4 @@
-import { inflate } from 'pako';
+import { decompressSync } from 'fflate';
 
 export function decompressZlib(stripData: DataView): DataView {
   const stripUint8 = new Uint8Array(
@@ -6,7 +6,8 @@ export function decompressZlib(stripData: DataView): DataView {
     stripData.byteOffset,
     stripData.byteLength,
   );
-  const inflated = inflate(stripUint8);
+  const inflated = decompressSync(stripUint8);
+
   return new DataView(
     inflated.buffer,
     inflated.byteOffset,
