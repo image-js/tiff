@@ -364,13 +364,13 @@ test('specify pages to decode', () => {
 });
 
 test('should throw if pages invalid', () => {
-  expect(() => decode(stack, { pages: [-1] })).toThrow(
+  expect(() => decode(stack, { pages: [-1] })).toThrowError(
     'Index -1 is invalid. Must be a positive integer.',
   );
-  expect(() => decode(stack, { pages: [0.5] })).toThrow(
+  expect(() => decode(stack, { pages: [0.5] })).toThrowError(
     'Index 0.5 is invalid. Must be a positive integer.',
   );
-  expect(() => decode(stack, { pages: [20] })).toThrow(
+  expect(() => decode(stack, { pages: [20] })).toThrowError(
     'Index 20 is out of bounds. The stack only contains 10 images.',
   );
 });
